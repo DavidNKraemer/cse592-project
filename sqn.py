@@ -15,6 +15,7 @@ def sqn(x0, H1, m, alpha, g, dist):
     # iteration parameters
     MAX_ITER = 100
     tol = 1e-8
+    p = 4  # memory size
 
 
     # iterate data, which is computed and eventually to be returned     
@@ -31,13 +32,13 @@ def sqn(x0, H1, m, alpha, g, dist):
     # main loop
     while err[k] >= tol and k < MAX_ITER:
         # general SQN step
-        x[k+1] = x[k] - alpha[k] * sdlbfgs_step(k, dist, m, g, x, s, y)
+        x[k+1] = x[k] - alpha[k] * sdlbfgs_step(k, dist, m, g, x, s, y, p)
         err[k+1] = np.linalg.norm(x[k+1] - x[k])
 
     return x[:k], err[:k]
 
 
-def sdlbfgs_step(k, dist, m, g, x, s, y):
+def sdlbfgs_step(k, dist, m, g, x, s, y, p):
     """
     Step computation using SdLBFGS
     k:    current iteration
@@ -48,12 +49,19 @@ def sdlbfgs_step(k, dist, m, g, x, s, y):
     s:    blah 
     y:    blah
     """
+
+    mu = np.empty((np.min(p,k-1), 1))
+    u = np.empty((np.min(p,k-1), *y[0].shape))
+    u[0] = g[k]
+
+    # draw the random sample
     xi_k = dist(m[k])
+    
     
     s[k-1] = x[k] - x[k-1]
     y[k-1] = np.sum(g(x[k], xi_k[i]) - g(x[k-1], xi_k[i-1]) for i in range(len(xi_k))) / m[k]
 
-    gammak = np.max(
+    gamma = np.max(
             delta,
             np.dot(y[k-1], y[k-1]) / np.dot(s[k-1], y[k-1])
             )
