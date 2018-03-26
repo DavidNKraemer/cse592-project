@@ -1,9 +1,23 @@
 import numpy as np
 
 def sqn(x0, H1, m, alpha, g, dist):
+    """
+    Stochastic Quasi Newton's Method
+    x0:    the starting point
+    H1:    the initial approximation of the gradient
+    m:     a sequence of batch sizes
+    alpha: a sequence of step sizes
+    g:     R^n x R^d -> R, stochastic gradient of f taking location and random input
+    dist:  the distribution of the random variable
+
+    """
+
+    # iteration parameters
     MAX_ITER = 100
     tol = 1e-8
 
+
+    # iterate data, which is computed and eventually to be returned     
     x = np.empty((MAX_ITER+1, *x0.shape))
     s = np.empty((MAX_ITER+1, *x0.shape))
     y = np.empty((MAX_ITER+1, *x0.shape))
@@ -13,14 +27,27 @@ def sqn(x0, H1, m, alpha, g, dist):
     err[0] = np.linalg.norm(x0)
 
     k = 0
+
+    # main loop
     while err[k] >= tol and k < MAX_ITER:
-        
+        # general SQN step
         x[k+1] = x[k] - alpha[k] * sdlbfgs_step(k, dist, m, g, x, s, y)
         err[k+1] = np.linalg.norm(x[k+1] - x[k])
 
     return x[:k], err[:k]
 
+
 def sdlbfgs_step(k, dist, m, g, x, s, y):
+    """
+    Step computation using SdLBFGS
+    k:    current iteration
+    dist: the distribution of the random variable
+    m:    sequence of batch sizes
+    g:    R^n x R^d -> R, stochastic gradient of f taking location and random input
+    x:    sequence of points in algorithm [TODO: this needs rewriting]
+    s:    blah 
+    y:    blah
+    """
     xi_k = dist(m[k])
     
     s[k-1] = x[k] - x[k-1]
