@@ -15,14 +15,16 @@ def sqn(x0, H1, m, alpha, g, dist):
     # iteration parameters
     MAX_ITER = 100
     tol = 1e-8
-    p = 4  # memory size
+    p = 4  # memory size, don't know what this means
 
 
     # iterate data, which is computed and eventually to be returned     
     x = np.empty((MAX_ITER+1, *x0.shape))
     s = np.empty((MAX_ITER+1, *x0.shape))
     y = np.empty((MAX_ITER+1, *x0.shape))
+    ybar = np.empty((MAX_ITER+1, *x0.shape))
     err = np.empty(MAX_ITER+1)
+    rho = np.empty(MAX_ITER+1)
 
     x[0] = x0
     err[0] = np.linalg.norm(x0)
@@ -32,13 +34,13 @@ def sqn(x0, H1, m, alpha, g, dist):
     # main loop
     while err[k] >= tol and k < MAX_ITER:
         # general SQN step
-        x[k+1] = x[k] - alpha[k] * sdlbfgs_step(k, dist, m, g, x, s, y, p)
+        x[k+1] = x[k] - alpha[k] * sdlbfgs_step(k, dist, m, g, x, s, y, p, rho, ybar)
         err[k+1] = np.linalg.norm(x[k+1] - x[k])
 
     return x[:k], err[:k]
 
 
-def sdlbfgs_step(k, dist, m, g, x, s, y, p):
+def sdlbfgs_step(k, dist, m, g, x, s, y, p, rho, ybar):
     """
     Step computation using SdLBFGS
     k:    current iteration
@@ -50,8 +52,9 @@ def sdlbfgs_step(k, dist, m, g, x, s, y, p):
     y:    blah
     """
 
-    mu = np.empty((np.min(p,k-1), 1))
-    u = np.empty((np.min(p,k-1), *y[0].shape))
+    sub_iter_len = min(p, k-1)
+    mu = np.empty((sub_iter_len, 1))
+    u = np.empty((sub_iter_len, *y[0].shape))
     u[0] = g[k]
 
     # draw the random sample
@@ -61,28 +64,25 @@ def sdlbfgs_step(k, dist, m, g, x, s, y, p):
     s[k-1] = x[k] - x[k-1]
     y[k-1] = np.sum(g(x[k], xi_k[i]) - g(x[k-1], xi_k[i-1]) for i in range(len(xi_k))) / m[k]
 
-    gamma = np.max(
-            delta,
-            np.dot(y[k-1], y[k-1]) / np.dot(s[k-1], y[k-1])
-            )
+    sTy = np.dot(s[k-1], y[k-1])
+    gamma = np.max(delta, np.dot(y[k-1], y[k-1]) / sTy)
 
-    thetakm1 = 1.
-    if skm1.dot(ykm1) < 0.25 * skm1.dot(ihessk).dot(skm1):
-        thetakm1 =0.75 * skm1.dot(ihessk).dot(skm1) / \
-                (skm1.dot(ihessk).dot(skm1) - skm1.dot(ykm1))
+    theta = 1.
+    sTHs = np.dot(s[k-1], np.dot(ihessk, s[k-1]))
+    if sTy < 0.25 * sTHs:
+        theta = 0.75 * sTHs / (sTHs - sTy)
 
-    ybarkm1 = thetakm1 * ykm1 + (1-thetakm1) * ihessk.dot(skm1)
-    rhokm1 = 1./skm1.dot(ybarkm1)
+    ybar[k-1] = theta * y[k-1] + (1-theta) * np.dot(ihessk, s[k-1])
+    rho[k-1] = 1./s[k-1].dot(ybar[k-1])
 
-    for i in range(min(p, k-1)):
-        mu[i] = rho[k-i-1] * u[i].dot(s[k-i-1])
+    for i in range(sub_iter_len):
+        mu[i] = rho[k-i-1] * np.dot(u[i], s[k-i-1])
         u[i+1] = u[i] - mu[i] * ybar[k-i-1]
 
-    v0 = u[p] / gammak
-    for i in range(min(p,k-1)):
-        nu[i] = rho[k-p+i] * v[i].dot(ybar[k-p+i])
+    v0 = u[p] / gamma
+    for i in range(sub_iter_len):
+        nu[i] = rho[k-p+i] * np.dot(v[i], ybar[k-p+i])
         v[i+1] = v[i] + (mu[p-i-1] - nu[i]) * s[k-p+i]
 
     return v[p]
-
 
