@@ -7,10 +7,16 @@ Created on Thu Apr 19 02:07:39 2018
 import numpy as np
 import random as rand
 import Functions as Fun
+from scipy.optimize import OptimizeResult
 
 class SDLBFGS():
-    def __init__(self, max_iteration=1000, mem_size=10, batch_size=50, step_size=0.1,
-                 delta=0.01, func, datas):
+    def __init__(self, func, datas, *args, 
+            max_iteration=1000, 
+            mem_size=10, 
+            batch_size=50, 
+            step_size=0.1,
+            delta=0.01, 
+            **kwargs):
         self.max_iteration = max_iteration
         self.mem_size = mem_size
         self.batch_size = batch_size
@@ -34,6 +40,8 @@ class SDLBFGS():
         self.S = np.zeros((self.num_feature, mem_size))
         '''Y is diff bewteen st_gradient'''
         self.Y = np.zeros((self.num_feature, mem_size))
+
+        self.result = OptimizeResult()
 
     def reset_S_Y(self):
         self.S = np.zeros((self.num_feature, mem_size))
@@ -127,6 +135,22 @@ class SDLBFGS():
             v0 +=
 
         return Hg
+
+    def package_result(self):
+        self.result['x'] = 1.
+        self.result['success'] = True
+        self.result['status'] = 0
+        self.result['message'] = 'SdLBFGS terminated with{} errors.'.format(
+                'out' if self.result['success'] else ''
+                )
+        self.result['fun'] = 1.
+        self.result['jac'] = 1.
+        self.result['nfev'] = 1
+        self.result['njev'] = 1
+        self.result['nit'] = 1
+
+        return result
+
 
 
 
