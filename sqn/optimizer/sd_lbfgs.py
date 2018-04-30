@@ -78,6 +78,7 @@ class SdLBFGS():
     def sdlbfgs_step(self):
         #print(f'{self._current_val}, {self._current_grad}')
         k = self._iterations
+        p = self._mem_size
 
         s = self._current_val - self._previous_val
         y = self._current_grad - self._previous_grad
@@ -107,27 +108,19 @@ class SdLBFGS():
         u = self._current_grad.copy()
         mus = []
 
-        p = self._mem_size
-
-        print(self._rhos)
         irange = range(min(p, k-1))
+        print(irange, len(mus))
         for i in irange:
             mu = self._rhos[k-i-1] * dot(u, self._backward_errors[k-i-1])
             u -= mu * self._ybars[k-i-1]
             mus.append(mu)
-        print(f' !!!mus {mus}')
 
         v = (1. / gamma) * u
         for i in irange:
-            nu = self._rhos[k-p+i] * \
-                    dot(v, self._ybars[k-p+i])
+            print(p, i)
+            nu = self._rhos[k-p+i] * dot(v, self._ybars[k-p+i])
+            v += (mus[p-i-1] - nu) * self._backward_errors[k-p+i]
 
-#            print(f"p-i-1: {p-i-1}")
-#            print(f"size mus: {len(mus)}")
-
-            v += (mus[p-i-2] - nu) * self._backward_errors[k-p+i]
-
-        #print(f'v: {v}')
         return v
 
 
