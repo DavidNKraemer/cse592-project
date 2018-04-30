@@ -30,7 +30,6 @@ def weird_func( x, order=0 ):
   else:
         raise ValueError("The argument \"order\" should be 0, 1 or 2")
 
-
 ###############################################################################
 def boyd_example_func(x, order=0):
   a=np.matrix('1  3')

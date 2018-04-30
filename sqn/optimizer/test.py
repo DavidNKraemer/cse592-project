@@ -6,10 +6,18 @@ import numpy as np
 from time import sleep
 from pprint import pprint
 
-optimizer = SdLBFGS(lambda x: weird_func(x, order=1), 0.)
+def quadratic(x, order=1):
+    if order == 0:
+        return x * x
+    if order==1:
+        return x * x, 2 * x
 
-for i in range(5):
-    pprint(optimizer.__dict__)
+
+optimizer = SdLBFGS(lambda x: quadratic(x, order=1), -1.,
+        batch_size=2)
+
+for i in range(50):
+    # pprint(optimizer.__dict__)
     optimizer.sqn_step()
 
 # vector = tf.Variable([7., 7.], 'vector')

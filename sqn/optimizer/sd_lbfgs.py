@@ -10,7 +10,7 @@ from scipy.optimize import OptimizeResult
 
 def harmonic_sequence(k):
     # For any nonnegative integer
-    return 1./(k+1)
+    return 1./(10 * (k+1))
 
 class SdLBFGS():
     def __init__(self, func, initial_val, *args,
@@ -35,6 +35,7 @@ class SdLBFGS():
         self._iterations = 0
         self._current_val = self._initial_val.copy()
         self._previous_val = zeros(self._initial_val.shape)
+        self._current_grad = zeros(self._initial_val.shape)
         self._previous_grad = zeros(self._initial_val.shape)
 
         self._backward_errors = ShiftList(self._max_mem_size)
@@ -54,31 +55,31 @@ class SdLBFGS():
         for i in range(self._batch_size):
             _, g = self._func(self._current_val)
             grad += g
-            print(g)
         grad /= self._batch_size
+        self._current_grad = grad
 
         # stopping criterion, sends back to self.run()
-        if dot(grad, grad) <= self._tolerance:
+        if dot(self._current_grad, self._current_grad) <= self._tolerance:
             return
 
         # compute search direction
-        direction = self.sdlbfgs_step(grad)
+        direction = self.sdlbfgs_step()
 
         # update the iteration invariants
         self._previous_val = self._current_val.copy()
         self._current_val -= self._step_size(self._iterations) * direction
-        self._previous_grad = grad.copy()
+        self._previous_grad = self._current_grad.copy()
         self._iterations += 1
 
 
-    def sdlbfgs_step(self, stochastic_grad):
-        p = self._mem_size
+    def sdlbfgs_step(self):
+        #print(f'{self._current_val}, {self._current_grad}')
         k = self._iterations
 
         s = self._current_val - self._previous_val
-        y = stochastic_grad - self._previous_grad
+        y = self._current_grad - self._previous_grad
 
-        print(f's: {s}, y: {y}')
+        #print(f's: {s}, y: {y}')
 
         # compute theta
         sTy = dot(s, y)
@@ -97,23 +98,28 @@ class SdLBFGS():
         self.update_memory_vars(s, y_bar, rho)
 
         if k == 0:
-            return stochastic_grad
+            return self._current_grad
 
-        u = stochastic_grad.copy()
+        u = self._current_grad.copy()
         mus = []
+
+        p = self._mem_size
+        print(p)
         irange = range(min(p, k-1))
         for i in irange:
             mu = self._rhos[k-i-1] * dot(u, self._backward_errors[k-i-1])
             u -= mu * self._ybars[k-i-1]
             mus.append(mu)
-
+        print(mus)
 
         v = (1. / gamma) * u
         for i in irange:
             nu = self._rhos[k-p+i] * \
                     dot(v, self._ybars[k-p+i])
-            v += (mus[k-p+i] - nu) * self._backward_errors[i]
+            print(f"p-i-1: {p-i-1}")
+            v += (mus[p-i-1] - nu) * self._backward_errors[i]
 
+        #print(f'v: {v}')
         return v
 
 
@@ -121,6 +127,7 @@ class SdLBFGS():
         self._backward_errors.append(backwards_error)
         self._ybars.append(forward_error)
         self._rhos.append(inverse_dp)
+        print(f'(mem size: {self._mem_size})')
 
         self._mem_size = min(self._mem_size + 1, self._max_mem_size)
 

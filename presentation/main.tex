@@ -71,10 +71,10 @@ David Kraemer\inst{1}}
     \item Wang, et al showed that convergence (in expectation) is guaranteed by
       applying dampening at specific places in the approximation.
     \item Crucially, this holds even if the problem is \textbf{non-convex}.
-    \item Their update, \texttt{SdLBFGS}, 
-  \end{itemize}<++>
-  
-\end{frame}<++>
+    \item Their update, \texttt{SdLBFGS}, preserves the positive-definiteness of
+      $H_k$ even in non-convex situations.
+  \end{itemize}
+\end{frame}
 
 \begin{frame}[t]{Implementation}
   \begin{itemize}
