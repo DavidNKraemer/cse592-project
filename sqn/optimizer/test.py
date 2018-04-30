@@ -13,14 +13,21 @@ def quadratic(x, order=1):
         return x * x, 2 * x
 #%%
 
-optimizer = SdLBFGS(lambda x: quadratic(x, order=1), 1.,
+optimizer = SdLBFGS(lambda x: weird_func(x, order=1), 1.,
         batch_size=2)
 
-for i in range(10):
-    print(i)
-#    pprint(optimizer.__dict__)
-    optimizer.sqn_step()
-    print()
+# for i in range(10):
+#     optimizer.sqn_step()
+
+result = optimizer.run()
+import matplotlib.pyplot as plt
+
+x = np.array(result['iteration_vals'])
+vq = np.vectorize(weird_func)
+y = vq(x, order=0)
+plt.plot(x,y, 'o')
+plt.show()
+
 
 # vector = tf.Variable([7., 7.], 'vector')
 #

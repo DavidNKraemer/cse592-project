@@ -10,7 +10,7 @@ from scipy.optimize import OptimizeResult
 
 def harmonic_sequence(k):
     # For any nonnegative integer
-    return 0.1/(sqrt(k+1))
+    return 0.9/(sqrt(k+1))
 
 class SdLBFGS():
     def __init__(self, func, initial_val, *args,
@@ -19,7 +19,7 @@ class SdLBFGS():
             batch_size=50,
             step_size=harmonic_sequence,
             delta=0.01,
-            tol=1e-5,
+            tol=1e-4,
             **kwargs):
 
         self._func = func
@@ -42,9 +42,15 @@ class SdLBFGS():
         self._ybars = ShiftList(self._max_mem_size)
         self._rhos = ShiftList(self._max_mem_size)
 
+        self._iteration_vals = [self._current_val]
+
+        self._result = OptimizeResult()
+        self._result['success'] = False
+        
+
 
     def run(self):
-        while self._iterations < self._max_iterations:
+        while not self._result['success'] and self._iterations < self._max_iterations:
             self.sqn_step()
         return self.result()
 
@@ -52,7 +58,6 @@ class SdLBFGS():
     def sqn_step(self):
         # compute stochastic gradient
         grad = zeros(self._current_val.shape)
-#        print(self._current_val)
         for i in range(self._batch_size):
             _, g = self._func(self._current_val)
             grad += g
@@ -61,16 +66,17 @@ class SdLBFGS():
 
 
         # stopping criterion, sends back to self.run()
+        print(dot(self._current_grad, self._current_grad))
         if dot(self._current_grad, self._current_grad) <= self._tolerance:
-            return
+            self._result['success'] = True
 
         # compute search direction
         direction = self.sdlbfgs_step()
-        print(f'  direction {direction}')
 
         # update the iteration invariants
         self._previous_val = self._current_val.copy()
         self._current_val -= self._step_size(self._iterations) * direction
+        self._iteration_vals.append(self._current_val.copy())
         self._previous_grad = self._current_grad.copy()
         self._iterations += 1
 
@@ -82,8 +88,6 @@ class SdLBFGS():
 
         s = self._current_val - self._previous_val
         y = self._current_grad - self._previous_grad
-        print(f'current val: {self._current_val}')
-        print(f's: {s}, y: {y}')
 
         # compute theta
         sTy = dot(s, y)
@@ -109,7 +113,6 @@ class SdLBFGS():
         mus = []
 
         irange = range(min(p, k-1))
-        print(irange, len(mus))
         for i in irange:
             mu = self._rhos[k-i-1] * dot(u, self._backward_errors[k-i-1])
             u -= mu * self._ybars[k-i-1]
@@ -117,7 +120,6 @@ class SdLBFGS():
 
         v = (1. / gamma) * u
         for i in irange:
-            print(p, i)
             nu = self._rhos[k-p+i] * dot(v, self._ybars[k-p+i])
             v += (mus[p-i-1] - nu) * self._backward_errors[k-p+i]
 
@@ -137,21 +139,21 @@ class SdLBFGS():
 
 
     def result(self):
-        self.result['x'] = self._current_val
-        self.result['success'] = True
-        self.result['status'] = 0
-        self.result['message'] = 'SdLBFGS terminated with{} errors.'.format(
-                'out' if self.result['success'] else ''
+        self._result['x'] = self._current_val.copy()
+        self._result['status'] = 0
+        self._result['message'] = 'SdLBFGS terminated with{} errors.'.format(
+                'out' if self._result['success'] else ''
                 )
 
         f, g = self._func(self._current_val)
-        self.result['fun'] = f
-        self.result['jac'] = g
-        self.result['nfev'] = self._batch_size * self._iterations
-        self.result['njev'] = self._batch_size * self._iterations
-        self.result['nit'] = self._iterations
+        self._result['fun'] = f
+        self._result['jac'] = g
+        self._result['nfev'] = self._batch_size * self._iterations
+        self._result['njev'] = self._batch_size * self._iterations
+        self._result['nit'] = self._iterations
+        self._result['iteration_vals'] = self._iteration_vals
 
-        return result
+        return self._result
 
 
 
