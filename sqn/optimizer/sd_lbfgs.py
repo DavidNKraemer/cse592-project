@@ -24,6 +24,7 @@ class SdLBFGS():
 
         self._func = func
         self._initial_val = asarray(initial_val)
+#        self._initial_val = self._initial_val.reshape(self._initial_val.shape[0])
         self._max_iterations = max_iterations
         self._max_mem_size = mem_size
         self._mem_size = 0
@@ -46,7 +47,7 @@ class SdLBFGS():
 
         self._result = OptimizeResult()
         self._result['success'] = False
-        
+
 
 
     def run(self):
@@ -66,8 +67,9 @@ class SdLBFGS():
 
 
         # stopping criterion, sends back to self.run()
-        print(dot(self._current_grad, self._current_grad))
-        if dot(self._current_grad, self._current_grad) <= self._tolerance:
+        print(dot(self._current_grad.T, self._current_grad))
+        if dot(self._current_grad.T, self._current_grad) <= self._tolerance:
+
             self._result['success'] = True
 
         # compute search direction
@@ -90,9 +92,9 @@ class SdLBFGS():
         y = self._current_grad - self._previous_grad
 
         # compute theta
-        sTy = dot(s, y)
-        yTy = dot(y, y)
-        sTs = dot(s, s)
+        sTy = dot(s.T, y)
+        yTy = dot(y.T, y)
+        sTs = dot(s.T, s)
 
         gamma = max(yTy / sTy, self._delta)
 
@@ -102,7 +104,7 @@ class SdLBFGS():
             theta = 1.
         #theta =1
         y_bar = theta * y + ((1. - theta) * gamma) * s
-        rho = 1. / dot(s, y_bar)
+        rho = 1. / dot(s.T, y_bar)
 
 
         if k == 0:
@@ -114,13 +116,13 @@ class SdLBFGS():
 
         irange = range(min(p, k-1))
         for i in irange:
-            mu = self._rhos[k-i-1] * dot(u, self._backward_errors[k-i-1])
+            mu = self._rhos[k-i-1] * dot(u.T, self._backward_errors[k-i-1])
             u -= mu * self._ybars[k-i-1]
             mus.append(mu)
 
         v = (1. / gamma) * u
         for i in irange:
-            nu = self._rhos[k-p+i] * dot(v, self._ybars[k-p+i])
+            nu = self._rhos[k-p+i] * dot(v.T, self._ybars[k-p+i])
             v += (mus[p-i-1] - nu) * self._backward_errors[k-p+i]
 
         return v
