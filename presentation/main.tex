@@ -1,4 +1,4 @@
-\documentclass[draft]{beamer}
+\documentclass{beamer}
 
 \usetheme{Pittsburgh}
 \usecolortheme{dove}
@@ -47,7 +47,7 @@ David Kraemer\inst{1}}
 
 \begin{frame}[t]{Our contribution}
   \begin{itemize}
-    \item We implemented stochastic L-BFGS in \texttt{TensorFlow} following the
+    \item We implemented stochastic dampened (Sd) L-BFGS in \texttt{TensorFlow} following the
       work of Wang, Ma, Goldfarb, and Liu (2017).
     \item The approach is based on the iteration step:
       \[
@@ -88,7 +88,22 @@ David Kraemer\inst{1}}
   \end{itemize}
 \end{frame}
 
+\begin{frame}[t]{Results: sanity checks}
+  \includegraphics[width=\textwidth]{../plots/sanity_checks.eps} 
+  \begin{itemize}
+    \item Since our code is in \texttt{NumPy}, we could test it by running
+      familiar homework functions.
+    \item Here all gradients are deterministic.
+  \end{itemize}
+\end{frame}
 
 
+\begin{frame}[t]{Results: Higgs dataset}
+  \includegraphics[width=\textwidth]{../plots/higgs_dataset.eps} 
+\end{frame}
+
+\begin{frame}
+  
+\end{frame}
 
 \end{document}
