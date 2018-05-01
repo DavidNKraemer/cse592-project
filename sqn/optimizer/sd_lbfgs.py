@@ -84,7 +84,6 @@ class SdLBFGS():
 
 
     def sdlbfgs_step(self):
-        #print(f'{self._current_val}, {self._current_grad}')
         k = self._iterations
         p = self._mem_size
 
@@ -135,7 +134,6 @@ class SdLBFGS():
 
 
         self._mem_size = min(self._mem_size + 1, self._max_mem_size)
-#        print(f'(mem size: {self._mem_size})')
         if len(self._backward_errors) > self._max_mem_size:
             self._index_offset += 1
 

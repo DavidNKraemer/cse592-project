@@ -39,12 +39,9 @@ from hw4_functions import svm_objective_function as svm_func_obj
 x = np.array(result['iteration_vals'])
 vq = np.vectorize(lambda x: svm_func_obj(x, order=0, data=data))
 
-def pre_vectorized(x):
-    return  svm_func_obj(x, order=0, data=data)
-
-y = vq(pre_vectorized)
-plt.plot(x,y, 'o')
-plt.show()
+x = np.array(result['iteration_vals'])
+vq = np.vectorize(weird_func)
+y = vq(x, order=0)
 
 
 # vector = tf.Variable([7., 7.], 'vector')

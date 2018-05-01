@@ -29,6 +29,9 @@ from tensorflow.examples.tutorials.mnist import input_data
 from tensorflow.contrib.opt.python.training.external_optimizer import ScipyOptimizerInterface
 from tensorflow.python.ops import variables
 
+sys.path.insert(0, '../optimizer/')
+from sqn_optimizer_hooks import SQNOptimizer
+
 import tensorflow as tf
 
 FLAGS = None
@@ -59,7 +62,7 @@ def main(_):
   cross_entropy = tf.reduce_mean(
       tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
   #train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-  optimizer = ScipyOptimizerInterface(loss=cross_entropy)
+  optimizer = SQNOptimizer(cross_entropy)
 
   with tf.Session() as sess:
     # Train
