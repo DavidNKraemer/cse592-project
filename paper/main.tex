@@ -1,6 +1,6 @@
 \documentclass{article}
 
-\usepackage[preprint]{nips_2018}
+\usepackage[nonatbib,preprint]{nips_2018}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -10,6 +10,28 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{optidef}
+\usepackage{stmaryrd}
+\usepackage{mathtools}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\usepackage[
+  backend=biber,
+  style=nature,
+  sorting=ynt
+]{biblatex}
+\addbibresource{main.bib}
+
+
+\newcommand{\RR}{\mathbb{R}}
+\DeclarePairedDelimiter{\norm}{\|}{\|}
+\DeclarePairedDelimiter{\ip}{\langle}{\rangle}
+\DeclarePairedDelimiter{\ex}{\mathbb{E}[}{]}
+\newcommand{\inv}{{}^{-1}}
+\newcommand{\trans}{{}^{\top}}
+
+
 
 \title{A Stochastic Quasi-Newton Optimizer for TensorFlow}
 \author{
@@ -28,157 +50,203 @@
 
 \date{May 6, 2018}
 
+
 \begin{document}
 
+
 \maketitle
+
 
 \begin{abstract}
   We do some shit and it doesn't work.
 \end{abstract}
 
+
 \section{Introduction}
 
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
+
+\begin{enumerate}
+  \item Introduce problem that SdLBFGS solves.
+  \item TensorFlow current state of the art.
+  \item Problems with the TensorFlow state.
+  \item Overview of paper.
+\end{enumerate}
+
 
 \section{Review of theory}
 
 
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
+\begin{enumerate}
+  \item Review main results of the Wang, Ma, Goldfarb, Liu paper
+    \cite{sdlbfgs}
+  \item State the SdLBFGS algortihm.
+  \item Mention some details about how the algorithm translates to code.
+\end{enumerate}
+
+
+The SdLBFGS algorithm is proposed by Wang, Ma, Goldfarb, and Liu \cite{sdlbfgs}
+for solving nonconvex stochastic optimization problems. In particular, it solves
+\begin{mini}
+  {x \in \RR^n}{f(x) = \ex{F(x, \xi)}}{}{} 
+  \label{prb:mini}
+\end{mini}
+for $F \in C^1(\RR^n \times \RR^d)$ and $\xi \in \RR^d$ is a random variable
+with cumulative distribution function $P$. Here $\ex{\cdot}$ denotes the
+mathematical expectation. In general $F$ need not be convex.
+
+The function $F$ is readily interpreted in the context of supervised statistical
+learning.  Given a corpus $\Xi$ of data, we put a distribution on $\Xi$ which
+reflects a sampling regime for a training set. The object of the learning
+process is, then, to the model parameter $x \in \RR^n$ which minimizes $F$
+\emph{in expectation} with respect to the training set. Provided that the
+sampling maintains some resemblance to the overall corpus, this gives a useful
+approximate parameter for the whole corpus.
+
+The SdLBFGS algorithm emerges from two concurrent optimization techniques.
+First, it follows in the tradition of approximate second-order algorithms which
+seek to perform a version of Newton's method while avoiding the computation of
+the Hessian $\nabla^2 f(x)$ explicitly. The classical BFGS approach is the
+canoncal quasi-Newton method. Second, it follows the development of stochastic
+algorithms which seek to randomly sample the components of the gradient $\nabla
+f(x)$ so that the essential convergence properties hold in expectation. In this
+sense it succeeds Stochastic Gradient Descent, among other canonical methods of
+this class. The limited memory constraint has antecedents in both streams of
+optimization techniques.
+
+Wang et al. \cite{sdlbfgs} assume that Problem (\ref{prb:mini}) satisfies the
+following assumptions:
+\begin{enumerate}
+  \item There is a real lower bound for $f$. That is, $\inf_{x \in \RR^n} f(x) >
+    -\infty$.
+  \item The gradient $\nabla f$ is Lipschitz continuous. That is, there exists
+    $L > 0$ such that 
+    \begin{equation*}
+      \norm{\nabla f(x) - \nabla f(y)} \leq L \norm{x - y}
+    \end{equation*}
+    for all $x,y \in \RR^n$. Moreover, $\nabla_{xx} F(x, \xi)$ exists and is
+    continuous and there exists $\kappa > 0$ with $\norm{\nabla^2_{xx} F(x,
+    \varepsilon)} \leq \kappa$ for any $x, \xi$.
+  \item The sampling regime is unbiased. That is, for the $k$th iterate the
+    following hold:
+    \begin{align*}
+      \ex{g(x_k, \xi_k)}_{\xi_k} &= \nabla f(x_k), \\
+      \ex{\norm{g(x_k, \xi_k) - \nabla f(x_k)}^2}_{\xi_k} &\leq \sigma^2,
+    \end{align*}
+    where $g(x, \xi_k) = \nabla F(x, \xi_k)$ and $\sigma^2$ is the noise level
+    of estimating $g(x, \xi_k)$. 
+\end{enumerate}
+
+For a convex function, $\nabla^2 f(x)$ is alwayas positive definite, but this
+need not be the case in for nonconvex functions. The work in Wang et al.
+\cite{sdlbfgs} shows how the BFGS approximate Hessian may be tweaked to ensure
+that positive definiteness is preserved even in nonconvex cases. The overall
+stochastic quasi-Newton method is described in Algorithm \ref{alg:sqn}, while
+the detailed implementation of SdLBFGS is given in Algorithm \ref{alg:sdlbfgs}.
+
+\begin{algorithm}
+  \begin{algorithmic}[1]
+    \Function{SQN}{$x_1, \ip{m_k}_{k=1}^{\infty},
+    \ip{\alpha_k}_{k=1}^{\infty}, p$}
+    \State{$\textrm{data} \leftarrow \emptyset$}
+    \For {$k = 1, 2, \dots$}
+    \State{$g_k \leftarrow \frac{1}{m_k} \sum_{i=1}^{m_k} g(x_k,
+    \varepsilon_{k,i})$} 
+    \State{$\Delta x_k, s_{k-1}, \bar{y}_{k-1}, \rho_{k-1} \leftarrow
+    \textsc{SdLBFGS}(g_k, {}^*(\textrm{data}\trans))$} \Comment{Tuple unpacking}
+    \State{$x_{k+1} \leftarrow x_k - \alpha_k \Delta x_k$}
+    \State{$\textit{append}(\textrm{data}, (s_{k-1}, \bar{y}_{k-1}, \rho_{k-1}))$}
+    \If{$k > p$}
+    \State{$\textit{pop}(\textrm{data})$}
+    \EndIf
+    \EndFor
+    \EndFunction
+  \end{algorithmic}
+  \label{alg:sqn}
+  \caption{%
+    The high level stochastic quasi-Newton minimization algorithm. Given an
+    initial point $x_1 \in \RR^n$, batch sizes $\ip{m_k}$, step sizes
+    $\ip{\alpha_k}$, and a maximum memory capacity $p$, perform BFGS with the
+    stochastic dampened direction update.
+  }
+\end{algorithm}
+
+\begin{algorithm}
+  \begin{algorithmic}[1]
+    \Function{SdLBFGS}{$g_{k-1}, \ip{s_{j}}_{j=k-p}^{k-2},
+    \ip{\bar{y}_{j}}_{j=k-p}^{k-2}, \ip{\rho_{j}}_{j=k-p}^{k-2}$}
+    \State{$\textrm{mem} \leftarrow \textit{min}(p, k-1)$}
+    \State{$s_{k-1} \leftarrow x_k - x_{k-1}$}
+    \State{$y_{k-1} \leftarrow \frac{1}{m_{k-1}}\sum_{i=1}^{m_{k-1}}[g(x_k,
+    \xi_{k-1,i}) - g(x_{k-1}, \xi_{k-1,i})]$}
+    \State{$\gamma_k \leftarrow \textit{max}\left( \frac{y_{k-1}\trans
+    y_{k-1}}{s\trans_{k-1}y_{k-1}}, \delta \right) \geq \delta$}
+    \State{%
+      $\theta \leftarrow
+      \textit{max}\left( 
+        \frac{3}{4} \frac{\gamma_{k}\inv s_{k-1}\trans
+        s_{k-1}}{\gamma_k\inv s_{k-1}\trans s_{k-1} - s_{k-1}\trans y_{k-1}}, 1
+      \right)
+    $}
+    \Comment{$\theta$ preserves positive definiteness.}
+    \State{$\bar{y}_{k-1} \leftarrow \theta y_{k-1} + (1 -\theta \gamma_{k}\inv s_{k-1})$}
+    \State{$\rho_{k-1} \leftarrow (s_{k-1}\trans \bar{y}_{k-1})\inv$}
+    \For{$i =0 , \dots, \textrm{mem}-1$}
+    \State{$\mu_i \leftarrow \rho_{k-i-1} u_i\trans s_{k-i-1}$} 
+    \State{$u_{i+1} \leftarrow u_i - \mu_i \bar{y}_{k-i-1}$}
+    \EndFor
+    \State{$v_0 \leftarrow \gamma_k\inv u_{\textrm{mem}}$}
+    \For{$i =0 , \dots, \textrm{mem}-1$}
+    \State{$\nu_i \leftarrow \rho_{k-\textrm{mem}+i} v_i\trans
+    \bar{y}_{k-\textrm{mem}+i}$}
+    \State{$v_{i+1} \leftarrow v_i + (\mu_{\textrm{mem}-i-1} - \nu_i)s_{k-\textrm{mem}+i} $}
+    \EndFor
+    \State{\Return{$v_p, s_{k-1}, \bar{y}_{k-1}, \rho_{k-1}$}}
+    \EndFunction
+  \end{algorithmic}
+  \caption{%
+    The SdLBFGS update step. The resulting output is $H_k g_k = v_p$,
+    where $H_k$ is the approximation of the $k$th iterate Hessian and $g_k$ is the
+    approximation of the $k$th iterate gradient. Note that the computation of $H_k$
+    is implicit, preventing additional storage requirements.
+  }
+  \label{alg:sdlbfgs}
+\end{algorithm}
+
+
+
 
 \section{Implementation}
 
 
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
+\begin{enumerate}
+  \item Describe how TensorFlow algorithms are usually implemented.
+  \item Contrast with our implementation of SdLBFGS.
+  \item Explain some implementation issues.
+\end{enumerate}
+
 
 \section{Empirical results}
 
 
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
+\begin{enumerate}
+  \item Results on simple optimization problems. 
+  \item Results on potentially more difficult optimization problems.
+  \item Lack of results on MNIST with TensorFlow.
+\end{enumerate}
+
 
 \section{Discussion}
 
 
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
-All work and no play makes Jack a dull boy.
+\begin{enumerate}
+  \item Explaining why the basic project --- implementing a useful practical
+    TensorFlow optimzier --- failed.
+  \item Takeaways from the results.
+  \item Future work.
+\end{enumerate}
+
+
+\printbibliography[heading=bibintoc]
+
 
 \end{document}

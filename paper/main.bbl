@@ -1,0 +1,78 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.9 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{ynt/global//global/global}
+    \entry{sdlbfgs}{article}{}
+      \name{author}{4}{}{%
+        {{hash=bd7d15d79ca36b953d99a1a0aaccb94a}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Xiao},
+           giveni={X\bibinitperiod}}}%
+        {{hash=ce94cb3d51692fc3f49e26b363a763f4}{%
+           family={Ma},
+           familyi={M\bibinitperiod},
+           given={Shiqian},
+           giveni={S\bibinitperiod}}}%
+        {{hash=5bf0f5ae463d891111f759554ade71fa}{%
+           family={Goldfarb},
+           familyi={G\bibinitperiod},
+           given={Donald},
+           giveni={D\bibinitperiod}}}%
+        {{hash=c0e0d23e2d09e45e6f51cc2bcea6d9f9}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Wei},
+           giveni={W\bibinitperiod}}}%
+      }
+      \strng{namehash}{0d4d723537ce643363f661a0a7e6cce0}
+      \strng{fullhash}{189b33b0a8aeaf2e9b07b9827bf8f090}
+      \strng{bibnamehash}{189b33b0a8aeaf2e9b07b9827bf8f090}
+      \strng{authorbibnamehash}{189b33b0a8aeaf2e9b07b9827bf8f090}
+      \strng{authornamehash}{0d4d723537ce643363f661a0a7e6cce0}
+      \strng{authorfullhash}{189b33b0a8aeaf2e9b07b9827bf8f090}
+      \field{sortinit}{2}
+      \field{sortinithash}{cbff857e587bcb4635511624d773949e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{SIAM Journal on Optimization}
+      \field{number}{2}
+      \field{title}{Stochastic Quasi-Newton Methods for Nonconvex Stochastic Optimization}
+      \field{volume}{27}
+      \field{year}{2017}
+      \field{pages}{927\bibrangedash 956}
+      \range{pages}{30}
+      \verb{doi}
+      \verb 10.1137/15M1053141
+      \endverb
+      \verb{eprint}
+      \verb https://doi.org/10.1137/15M1053141
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1137/15M1053141
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1137/15M1053141
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
