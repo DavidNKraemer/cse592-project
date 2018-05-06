@@ -62,11 +62,13 @@ def main(_):
   cross_entropy = tf.reduce_mean(
       tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
   #train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-  optimizer = SQNOptimizer(cross_entropy)
+  optimizer = SQNOptimizer(cross_entropy, batch_size=10, mem_size=1,
+          max_iterations=100)
 
   with tf.Session() as sess:
     # Train
-    for _ in range(1000):
+    for i in range(1000):
+      print(i,end='\r')  
       batch_xs, batch_ys = mnist.train.next_batch(100)
       sess.run(fetches=tf.global_variables_initializer())
       optimizer.minimize(sess, feed_dict={x: batch_xs, y_: batch_ys})

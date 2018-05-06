@@ -38,9 +38,12 @@ import numpy as np
 
 sys.path.insert(0, '../optimizer/')
 
+from sqn_optimizer_hooks import SQNOptimizer
 
-from external_optimizer import ScipyOptimizerInterface
-Optimizer = ScipyOptimizerInterface
+
+Optimizer = SQNOptimizer
+memsize = 2
+batch_size = 10
 
 FLAGS = None
 
@@ -80,7 +83,8 @@ def main(_):
     out = tf.matmul(h_fc2, W_fc3) + b_fc3
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=out))
-    optimizer = Optimizer(cross_entropy, options={'maxiter': 1})
+    optimizer = Optimizer(cross_entropy, mem_size=memsize, batch_size=batch_size,
+            max_iterations=50)
     correct_prediction = tf.equal(tf.argmax(out, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
@@ -89,7 +93,7 @@ def main(_):
         for i in range(600*40):
             print(f"{i}", end="\r")
             batch = mnist.train.next_batch(100)
-            if i % 200 == 0:
+            if i % 600 == 0:
                 test_batch_size = 10000
                 batch_num = int(mnist.train.num_examples / test_batch_size)
                 train_loss = 0
@@ -107,6 +111,8 @@ def main(_):
                 test_err = 1-accuracy.eval(feed_dict={x: mnist.test.images, y_: mnist.test.labels})
 
                 print('epoch %d, training cost %g, test error %g ' % (i/600, train_loss, test_err))
+                with open(f'{memsize}_memory_{batch_size}_batch.csv', 'a') as f:
+                    f.write(f'{i/600},{train_loss},{test_err}\n')
             optimizer.minimize(sess, feed_dict={x: batch[0], y_: batch[1]})
 
 
