@@ -78,11 +78,11 @@ David Kraemer\inst{1}}
 
 \begin{frame}[t]{Implementation}
   \begin{itemize}
-    \item Implementing L-BFGS proved challenging, and we discovered why it wasn't
+    \item Implementing SdLBFGS proved challenging, and we discovered why it wasn't
       part of the library already!
     \item Following the advice from the discussion of 
       \href{https://github.com/tensorflow/tensorflow/issues/446}{Issue 446}, we
-      implemented L-BFGS as an \texttt{ExternalOptimizerInterface}.
+      implemented SdLBFGS as an \texttt{ExternalOptimizerInterface}.
     \item This allowed us to write \texttt{NumPy} code but ``plug in'' to
       \texttt{TensorFlow}.
   \end{itemize}
