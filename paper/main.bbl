@@ -19,6 +19,184 @@
 
 \refsection{0}
   \datalist[entry]{ynt/global//global/global}
+    \entry{boyd}{book}{}
+      \name{author}{2}{}{%
+        {{hash=ec94d94cc487dd71939a90cbeaaf47d0}{%
+           family={Boyd},
+           familyi={B\bibinitperiod},
+           given={Stephen},
+           giveni={S\bibinitperiod}}}%
+        {{hash=2608d599a0bc2a784c301329a8da5f7b}{%
+           family={Vandenberghe},
+           familyi={V\bibinitperiod},
+           given={Lieven},
+           giveni={L\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{436abed3bce8d1b1d30640d4e5ff3d58}
+      \strng{fullhash}{436abed3bce8d1b1d30640d4e5ff3d58}
+      \strng{bibnamehash}{436abed3bce8d1b1d30640d4e5ff3d58}
+      \strng{authorbibnamehash}{436abed3bce8d1b1d30640d4e5ff3d58}
+      \strng{authornamehash}{436abed3bce8d1b1d30640d4e5ff3d58}
+      \strng{authorfullhash}{436abed3bce8d1b1d30640d4e5ff3d58}
+      \field{sortinit}{2}
+      \field{sortinithash}{cbff857e587bcb4635511624d773949e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{0521833787}
+      \field{title}{Convex Optimization}
+      \field{year}{2004}
+    \endentry
+    \entry{tensorflow}{misc}{}
+      \name{author}{40}{}{%
+        {{hash=3ee87a766009a829231f92dfc7eb5cb5}{%
+           family={Martı́n\bibnamedelima Abadi},
+           familyi={M\bibinitperiod}}}%
+        {{hash=6484757a54ad32eee1fb6f23a852feed}{%
+           family={Ashish\bibnamedelima Agarwal},
+           familyi={A\bibinitperiod}}}%
+        {{hash=363d0bd454a0acf5e160018cc47679cb}{%
+           family={Paul\bibnamedelima Barham},
+           familyi={P\bibinitperiod}}}%
+        {{hash=36935e9e96522c790fcef64db648b74b}{%
+           family={Eugene\bibnamedelima Brevdo},
+           familyi={E\bibinitperiod}}}%
+        {{hash=8c2edbc42572974d8f58b80f1b7a82b8}{%
+           family={Zhifeng\bibnamedelima Chen},
+           familyi={Z\bibinitperiod}}}%
+        {{hash=d64184d5c7ebf0bff2da33def2c1daea}{%
+           family={Craig\bibnamedelima Citro},
+           familyi={C\bibinitperiod}}}%
+        {{hash=3e5c2a3e735a28413c9345dce8945382}{%
+           family={Greg\bibnamedelima S.\bibnamedelimi Corrado},
+           familyi={C\bibinitperiod}}}%
+        {{hash=19cd724592ffc2c23adc3a351ae04818}{%
+           family={Andy\bibnamedelima Davis},
+           familyi={A\bibinitperiod}}}%
+        {{hash=1b1db793dba9fd87f2888084b31dad29}{%
+           family={Jeffrey\bibnamedelima Dean},
+           familyi={J\bibinitperiod}}}%
+        {{hash=a4beec028e32d2bc29fe1513c1402bb3}{%
+           family={Matthieu\bibnamedelima Devin},
+           familyi={M\bibinitperiod}}}%
+        {{hash=9c4b47d3e11d9b90aae441127f97dd79}{%
+           family={Sanjay\bibnamedelima Ghemawat},
+           familyi={S\bibinitperiod}}}%
+        {{hash=4f74a122133d7b67dcf443cdb4d3ba00}{%
+           family={Ian\bibnamedelima Goodfellow},
+           familyi={I\bibinitperiod}}}%
+        {{hash=9d272867c5ab5024df5fc861485ad56f}{%
+           family={Andrew\bibnamedelima Harp},
+           familyi={A\bibinitperiod}}}%
+        {{hash=d9984de031c203c48c5de1f785220cbf}{%
+           family={Geoffrey\bibnamedelima Irving},
+           familyi={G\bibinitperiod}}}%
+        {{hash=ec17cfcde99ebed9a72ff7ee449da430}{%
+           family={Michael\bibnamedelima Isard},
+           familyi={M\bibinitperiod}}}%
+        {{hash=9fce03efe6b3331a1b93ed2e7c0da9d5}{%
+           family={Jia},
+           familyi={J\bibinitperiod},
+           given={Yangqing},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=2d62ba69437cf1242ab96585123e8090}{%
+           family={Rafal\bibnamedelima Jozefowicz},
+           familyi={R\bibinitperiod}}}%
+        {{hash=2da41a2c3b85a2a33fc96a033e19e854}{%
+           family={Lukasz\bibnamedelima Kaiser},
+           familyi={L\bibinitperiod}}}%
+        {{hash=e949a308d49174d45e8466d134158cb6}{%
+           family={Manjunath\bibnamedelima Kudlur},
+           familyi={M\bibinitperiod}}}%
+        {{hash=7746c6a7e11b8d8783c883ebe4f05811}{%
+           family={Josh\bibnamedelima Levenberg},
+           familyi={J\bibinitperiod}}}%
+        {{hash=a06d8cd19395aaf5b59f4811d98ba3af}{%
+           family={Dandelion\bibnamedelima Man\'{\e}},
+           familyi={D\bibinitperiod}}}%
+        {{hash=2f1cb989adad55ce8fe49ce1cd21e476}{%
+           family={Rajat\bibnamedelima Monga},
+           familyi={R\bibinitperiod}}}%
+        {{hash=932c35b6750d308bab42b7be41a1e97f}{%
+           family={Sherry\bibnamedelima Moore},
+           familyi={S\bibinitperiod}}}%
+        {{hash=5601ebe22742e92a96eb4dc5f1420472}{%
+           family={Derek\bibnamedelima Murray},
+           familyi={D\bibinitperiod}}}%
+        {{hash=370cf3ba4b3dab98e9fe17565bcc9d13}{%
+           family={Chris\bibnamedelima Olah},
+           familyi={C\bibinitperiod}}}%
+        {{hash=a94f76acdb582d668dd64419448eceac}{%
+           family={Mike\bibnamedelima Schuster},
+           familyi={M\bibinitperiod}}}%
+        {{hash=ee4af4a6ef4e45adb464e4649b58727b}{%
+           family={Jonathon\bibnamedelima Shlens},
+           familyi={J\bibinitperiod}}}%
+        {{hash=5d2cfee8a5cc20953c5ab3b3093e5802}{%
+           family={Benoit\bibnamedelima Steiner},
+           familyi={B\bibinitperiod}}}%
+        {{hash=a5aa3398f4db70fce5f95429b615d485}{%
+           family={Ilya\bibnamedelima Sutskever},
+           familyi={I\bibinitperiod}}}%
+        {{hash=343da771330de282efb35b66924e931a}{%
+           family={Kunal\bibnamedelima Talwar},
+           familyi={K\bibinitperiod}}}%
+        {{hash=177c6dbcde719e364244ce3d3af70f42}{%
+           family={Paul\bibnamedelima Tucker},
+           familyi={P\bibinitperiod}}}%
+        {{hash=e7d07939b62ca40bce7edf20e91353ad}{%
+           family={Vincent\bibnamedelima Vanhoucke},
+           familyi={V\bibinitperiod}}}%
+        {{hash=76f098771e37211632499de837596d67}{%
+           family={Vijay\bibnamedelima Vasudevan},
+           familyi={V\bibinitperiod}}}%
+        {{hash=e74c1ec6dc149b11b04f8cca2cffbf0b}{%
+           family={Fernanda\bibnamedelima Vi\'{\e}gas},
+           familyi={F\bibinitperiod}}}%
+        {{hash=9a7adc5a0686b3b2510e47c23805274d}{%
+           family={Oriol\bibnamedelima Vinyals},
+           familyi={O\bibinitperiod}}}%
+        {{hash=12a8c841e3a2329ff94f16039686cf05}{%
+           family={Pete\bibnamedelima Warden},
+           familyi={P\bibinitperiod}}}%
+        {{hash=d5737f0c4be2ecc08c660a0b2ba965c9}{%
+           family={Martin\bibnamedelima Wattenberg},
+           familyi={M\bibinitperiod}}}%
+        {{hash=c1b76aa7f4c970a9da35e801f917e8cf}{%
+           family={Martin\bibnamedelima Wicke},
+           familyi={M\bibinitperiod}}}%
+        {{hash=d71c4759bc9cdb6d9ecab502aedf85e7}{%
+           family={Yuan\bibnamedelima Yu},
+           familyi={Y\bibinitperiod}}}%
+        {{hash=d84a11a3b9072f97eb2e3cb1b163b5a2}{%
+           family={Xiaoqiang\bibnamedelima Zheng},
+           familyi={X\bibinitperiod}}}%
+      }
+      \strng{namehash}{ac9549fca1133a43690b232a5c7d33ea}
+      \strng{fullhash}{02a44f4bc72931fe857983326f9817ed}
+      \strng{bibnamehash}{ac9549fca1133a43690b232a5c7d33ea}
+      \strng{authorbibnamehash}{ac9549fca1133a43690b232a5c7d33ea}
+      \strng{authornamehash}{ac9549fca1133a43690b232a5c7d33ea}
+      \strng{authorfullhash}{02a44f4bc72931fe857983326f9817ed}
+      \field{sortinit}{2}
+      \field{sortinithash}{cbff857e587bcb4635511624d773949e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Software available from tensorflow.org}
+      \field{title}{{TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems}
+      \field{year}{2015}
+      \verb{urlraw}
+      \verb https://www.tensorflow.org/
+      \endverb
+      \verb{url}
+      \verb https://www.tensorflow.org/
+      \endverb
+    \endentry
     \entry{sdlbfgs}{article}{}
       \name{author}{4}{}{%
         {{hash=bd7d15d79ca36b953d99a1a0aaccb94a}{%

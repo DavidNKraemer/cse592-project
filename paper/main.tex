@@ -2,8 +2,8 @@
 
 \usepackage[nonatbib,preprint]{nips_2018}
 
-\usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage{hyperref}       % hyperlinks
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
@@ -32,8 +32,9 @@
 \newcommand{\trans}{{}^{\top}}
 
 
-
 \title{A Stochastic Quasi-Newton Optimizer for TensorFlow}
+
+
 \author{
   Jason Chen \\
   Department of Computer Science \\
@@ -65,13 +66,76 @@
 \section{Introduction}
 
 
-\begin{enumerate}
-  \item Introduce problem that SdLBFGS solves.
-  \item TensorFlow current state of the art.
-  \item Problems with the TensorFlow state.
-  \item Overview of paper.
-\end{enumerate}
+%\begin{enumerate}
+%  \item Introduce problem that SdLBFGS solves.
+%  \item TensorFlow current state of the art.
+%  \item Problems with the TensorFlow state.
+%  \item Overview of paper.
+%\end{enumerate}
 
+
+Limited memory variations of classical second-order minimization algorithms can
+prove highly attractive in applications with high-dimensional problems or when
+the cost of each iteration step is prohibitive under these classical
+formulations.  Specifically, the canonical second-order technique, Newton's
+method, involves explicit computation of the Hessian matrix of the objective
+function, whose time complexity grows with the square of the parameter
+dimension. Even with BFGS, which seeks to reduce the direct computational
+difficulty of exactly constructing the Hessian itself, encounters similar
+difficulties of scale. The limited memory approach is to bound this overall cost
+and ensure that approximate Hessians can be computed on existing hardware.
+
+We implement a variant of stochastic second-order algorithm as described by
+Wang, Ma, Goldfarb, and Liu \cite{sdlbfgs} for application in the
+\texttt{TensorFlow} library \cite{tensorflow}.  \texttt{TensorFlow} is a
+framework for graph-based computation models. Its primary use within the
+statistical learning community is in neural networks, which can be readily
+implemented by the library. After the model is constructed, the actual training
+is performed by an \texttt{Optimizer} object. In this setting, the
+\texttt{Optimizer} is presented with a partially observable objective function
+and gradient from which to perform optimization. Some typical \texttt{Optimizer}
+subclasses which are available in the Python API include
+an \texttt{GradientDescentOptimizer}\footnote{%
+  See
+  \href{https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/training/gradient_descent.py}{source.}
+}% 
+and an \texttt{AdagradOptimizer}\footnote{%
+  See \href{https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/training/adagrad.py}{source.}
+}%
+
+The presently available optimization algorithms implemented in the Python
+library are either first or zeroeth-order methods, requiring access to either
+the objective function or its gradient. The conspicuous absence of second-order
+methods, such as Newton or quasi-Newton algorithms, has been a subject of much
+discussion inside the \texttt{TensorFlow} community\footnote{%
+  The primary discussion has occurred surrounding
+  \href{https://github.com/tensorflow/tensorflow/issues/446}{Issue \#446}, in
+  which contributors have noted that the current infrastructure for developing
+  second-order methods is lacking and any implementation would require
+  considerable re-inventing the wheel.
+.}
+
+Following the suggestions of the community discussion, we present an
+implementation of Stochastic damped limited memory BFGS (SdLBFGS) for
+\texttt{TensorFlow} through the use of an \texttt{ExternalOptimizerInterface}.
+Presently used to wrap existing minimization routines implemented by outside
+libraries such as \texttt{SciPy}, it serves as a simple way to engage with the
+\texttt{TensorFlow} internals while avoiding a deep dive into its architecture.
+
+Our work proceeds as follows. Section 2 reviews the problem proposed in Wang et
+al and gives an explicit formulation of SdLBFGS according to their paper. We
+identify small modifications made to the core pseudocode and explain their
+necessity. Section 3 describes our SdLBFGS implementation and how it interfaces
+with \texttt{TensorFlow}. Section 4 shows preliminary experimental results on
+the correctness of our implementation on simple problems. Importantly, we report
+that our present implementation is incapable of giving meaningful progress on
+training practical models on common datasets. In Section 5, we discuss the
+implications of this negative result on future development and specify areas in
+which our project may be continued and improved.
+
+Source code for this project can be found at
+\url{https://github.com/DavidNKraemer/cse592-project}. Documentation, cruft
+removal, and user interface improvements are currently evolving.
 
 \section{Review of theory}
 
@@ -136,12 +200,13 @@ following assumptions:
     of estimating $g(x, \xi_k)$. 
 \end{enumerate}
 
-For a convex function, $\nabla^2 f(x)$ is alwayas positive definite, but this
-need not be the case in for nonconvex functions. The work in Wang et al.
-\cite{sdlbfgs} shows how the BFGS approximate Hessian may be tweaked to ensure
-that positive definiteness is preserved even in nonconvex cases. The overall
-stochastic quasi-Newton method is described in Algorithm \ref{alg:sqn}, while
-the detailed implementation of SdLBFGS is given in Algorithm \ref{alg:sdlbfgs}.
+For a convex function, $\nabla^2 f(x)$ is always positive semidefinite (see Boyd
+and Vandenberghe \S 3.1.4 \cite{boyd}), but this need not be the case in for
+nonconvex functions. The work in Wang et al.  \cite{sdlbfgs} shows how the BFGS
+approximate Hessian may be tweaked to ensure that positive semidefiniteness is
+preserved even in nonconvex cases. The overall stochastic quasi-Newton method is
+described in Algorithm \ref{alg:sqn}, while the detailed implementation of
+SdLBFGS is given in Algorithm \ref{alg:sdlbfgs}.
 
 \begin{algorithm}
   \begin{algorithmic}[1]
@@ -187,7 +252,7 @@ the detailed implementation of SdLBFGS is given in Algorithm \ref{alg:sdlbfgs}.
         s_{k-1}}{\gamma_k\inv s_{k-1}\trans s_{k-1} - s_{k-1}\trans y_{k-1}}, 1
       \right)
     $}
-    \Comment{$\theta$ preserves positive definiteness.}
+    \Comment{$\theta$ preserves positive semidefiniteness.}
     \State{$\bar{y}_{k-1} \leftarrow \theta y_{k-1} + (1 -\theta \gamma_{k}\inv s_{k-1})$}
     \State{$\rho_{k-1} \leftarrow (s_{k-1}\trans \bar{y}_{k-1})\inv$}
     \For{$i =0 , \dots, \textrm{mem}-1$}
