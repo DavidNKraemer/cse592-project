@@ -188,7 +188,7 @@ following assumptions:
       \norm{\nabla f(x) - \nabla f(y)} \leq L \norm{x - y}
     \end{equation*}
     for all $x,y \in \RR^n$. Moreover, $\nabla_{xx} F(x, \xi)$ exists and is
-    continuous and there exists $\kappa > 0$ with $\norm{\nabla^2_{xx} F(x,
+    continuous, and there exists $\kappa > 0$ with $\norm{\nabla^2_{xx} F(x,
     \varepsilon)} \leq \kappa$ for any $x, \xi$.
   \item The sampling regime is unbiased. That is, for the $k$th iterate the
     following hold:
@@ -208,11 +208,25 @@ preserved even in nonconvex cases. The overall stochastic quasi-Newton method is
 described in Algorithm \ref{alg:sqn}, while the detailed implementation of
 SdLBFGS is given in Algorithm \ref{alg:sdlbfgs}.
 
+We note that the formulation of Algorithm \ref{alg:sdlbfgs} differs slightly
+from Wang et al. In the original paper, the use of $\textrm{mem}$ in the section
+corresponding to lines 15 and 16 of Algorithm \ref{alg:sdlbfgs} is replaced by
+$p$. This leads to the difficulty that if $p$ indicates memory \emph{capacity}
+rather than simply the current amount of data in memory, the indices can become
+negative early in the iteration. Specifically, when $k < p$ in the original
+paper the algorithm has undefined behavior. We clarify this ambiguity in the
+following way: in our implementation, $p$ indicates the total memory capacity of
+the procedure, regardless of the total amount of memory presently in use. The
+quantity $\textrm{mem}$ replaces $p$ in the SdLBFGS update step so as to prevent
+array index out of bounds errors when $k$ is small (i.e., $k < p$), but both our
+implementation and the original paper's exhibit the same behavior whenever $k >
+p$.
+
 \begin{algorithm}
   \begin{algorithmic}[1]
     \Function{SQN}{$x_1, \ip{m_k}_{k=1}^{\infty},
     \ip{\alpha_k}_{k=1}^{\infty}, p$}
-    \State{$\textrm{data} \leftarrow \emptyset$}
+    \State{$\textrm{data} \leftarrow \textit{nil}()$}
     \For {$k = 1, 2, \dots$}
     \State{$g_k \leftarrow \frac{1}{m_k} \sum_{i=1}^{m_k} g(x_k,
     \varepsilon_{k,i})$} 

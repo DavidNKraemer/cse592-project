@@ -54,8 +54,8 @@
     \endentry
     \entry{tensorflow}{misc}{}
       \name{author}{40}{}{%
-        {{hash=3ee87a766009a829231f92dfc7eb5cb5}{%
-           family={Martı́n\bibnamedelima Abadi},
+        {{hash=867ea07876949c233dd4a5481522faba}{%
+           family={Martín\bibnamedelima Abadi},
            familyi={M\bibinitperiod}}}%
         {{hash=6484757a54ad32eee1fb6f23a852feed}{%
            family={Ashish\bibnamedelima Agarwal},
@@ -177,12 +177,12 @@
            family={Xiaoqiang\bibnamedelima Zheng},
            familyi={X\bibinitperiod}}}%
       }
-      \strng{namehash}{ac9549fca1133a43690b232a5c7d33ea}
-      \strng{fullhash}{02a44f4bc72931fe857983326f9817ed}
-      \strng{bibnamehash}{ac9549fca1133a43690b232a5c7d33ea}
-      \strng{authorbibnamehash}{ac9549fca1133a43690b232a5c7d33ea}
-      \strng{authornamehash}{ac9549fca1133a43690b232a5c7d33ea}
-      \strng{authorfullhash}{02a44f4bc72931fe857983326f9817ed}
+      \strng{namehash}{eb1af34f2b39fb0fb65e784472639268}
+      \strng{fullhash}{a447a3d27b1bd55b871354f5372a22bb}
+      \strng{bibnamehash}{eb1af34f2b39fb0fb65e784472639268}
+      \strng{authorbibnamehash}{eb1af34f2b39fb0fb65e784472639268}
+      \strng{authornamehash}{eb1af34f2b39fb0fb65e784472639268}
+      \strng{authorfullhash}{a447a3d27b1bd55b871354f5372a22bb}
       \field{sortinit}{2}
       \field{sortinithash}{cbff857e587bcb4635511624d773949e}
       \field{labelnamesource}{author}
