@@ -5,21 +5,28 @@ Created on Thu Apr 19 02:07:39 2018
 @author: vbigmouse
 """
 from numpy import dot, zeros, asarray, sqrt
+from math import isnan, isinf
 from scipy.optimize import OptimizeResult
+from time import time
+from pprint import pprint
 
-
-def harmonic_sequence(k):
+def harmonic_sequence(k, init_step_size):
     # For any nonnegative integer
-    return 0.9/(sqrt(k+1))
+    return init_step_size /(k+1)
+#    return 10 / (k+1)
+def sqrt_sequence(k, init_step_size):
+    # For any nonnegative integer
+    return init_step_size /(sqrt(k+1))
 
 class SdLBFGS():
     def __init__(self, func, initial_val, *args,
             max_iterations=1000,
             mem_size=10,
             batch_size=50,
+            init_step_size=0.1,
             step_size=harmonic_sequence,
-            delta=0.01,
-            tol=1e-4,
+            delta=0.1,
+            tol=1e-6,
             **kwargs):
 
         self._func = func
@@ -29,7 +36,8 @@ class SdLBFGS():
         self._max_mem_size = mem_size
         self._mem_size = 0
         self._batch_size = batch_size
-        self._step_size = step_size
+        self._step_size = lambda k:step_size(k, self._init_step_size)
+        self._init_step_size = init_step_size
         self._delta = delta
         self._tolerance = tol
 
@@ -38,12 +46,18 @@ class SdLBFGS():
         self._previous_val = zeros(self._initial_val.shape)
         self._current_grad = zeros(self._initial_val.shape)
         self._previous_grad = zeros(self._initial_val.shape)
+        self._current_objval = asarray(self._func(self._current_val)[0])
 
         self._backward_errors = ShiftList(self._max_mem_size)
         self._ybars = ShiftList(self._max_mem_size)
         self._rhos = ShiftList(self._max_mem_size)
 
         self._iteration_vals = [self._current_val]
+        self._iteration_grads = [self._current_grad]
+        self._iteration_objvals = [self._current_objval]
+
+        self._start_time = time()
+        self._iteration_runtimes = [0]
 
         self._result = OptimizeResult()
         self._result['success'] = False
@@ -52,22 +66,37 @@ class SdLBFGS():
 
     def run(self):
         while not self._result['success'] and self._iterations < self._max_iterations:
+#            pprint(self.__dict__, indent=2)
             self.sqn_step()
+            self._iteration_runtimes.append(time() - self._start_time)
+
+
         return self.result()
 
 
     def sqn_step(self):
         # compute stochastic gradient
+
+        value = zeros(self._current_objval.shape)
         grad = zeros(self._current_val.shape)
         for i in range(self._batch_size):
-            _, g = self._func(self._current_val)
+            v, g = self._func(self._current_val)
+#            print(v)
             grad += g
+            value += v
+
         grad /= self._batch_size
+        value /= self._batch_size
+#        grad = self._func(self._current_val)
         self._current_grad = grad
+        self._current_objval = value
+
 
 
         # stopping criterion, sends back to self.run()
-        print(dot(self._current_grad.T, self._current_grad))
+#        if self._iterations % 10 == 0:
+#            print(f'norm of grad:={dot(self._current_grad.T, self._current_grad)}')
+
         if dot(self._current_grad.T, self._current_grad) <= self._tolerance:
 
             self._result['success'] = True
@@ -79,6 +108,8 @@ class SdLBFGS():
         self._previous_val = self._current_val.copy()
         self._current_val -= self._step_size(self._iterations) * direction
         self._iteration_vals.append(self._current_val.copy())
+        self._iteration_grads.append(self._current_grad.copy())
+        self._iteration_objvals.append(self._current_objval)
         self._previous_grad = self._current_grad.copy()
         self._iterations += 1
 
@@ -89,21 +120,34 @@ class SdLBFGS():
 
         s = self._current_val - self._previous_val
         y = self._current_grad - self._previous_grad
-
+#        print(f's={s}, cur_val={self._current_val}')
+#        print(f'y={y}, cur_grad={self._current_grad}')
         # compute theta
         sTy = dot(s.T, y)
         yTy = dot(y.T, y)
         sTs = dot(s.T, s)
+        if sTy == 0 or isinf(yTy / sTy) or isnan(yTy / sTy):
+            gamma = self._delta
+        else:
+            gamma = max(yTy / sTy, self._delta)
 
-        gamma = max(yTy / sTy, self._delta)
 
         if sTy < 0.25 * gamma * sTs:
-            theta = 0.75 * gamma * sTs / (gamma * sTs - sTy)
+            theta = (0.75 * gamma * sTs / (gamma * sTs - sTy)).item(0)
+            rho = 1. / (0.25 * gamma * sTs)
         else:
             theta = 1.
-        #theta =1
+            if sTy == 0:
+                rho = 0
+            else:
+                rho = 1. / sTy
+
+#        theta =1
+
         y_bar = theta * y + ((1. - theta) * gamma) * s
-        rho = 1. / dot(s.T, y_bar)
+
+#        rho = 1. / dot(s.T, y_bar)
+
 
 
         if k == 0:
@@ -152,6 +196,9 @@ class SdLBFGS():
         self._result['njev'] = self._batch_size * self._iterations
         self._result['nit'] = self._iterations
         self._result['iteration_vals'] = self._iteration_vals
+        self._result['iteration_grads'] = self._iteration_grads
+        self._result['iteration_objvals'] = self._iteration_objvals
+        self._result['iteration_runtimes'] = self._iteration_runtimes
 
         return self._result
 
