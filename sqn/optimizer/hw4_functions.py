@@ -138,7 +138,7 @@ def cross_entropy_error(w, data, order, minibatch_size):
     else:
         raise ValueError("The argument \"order\" should be 0 or 1")
 
-##################################################################3
+###################################################################
 def tanh_regul_error(w, data, order, minibatch_size, regularizer=1e-4):
     labels = data[:,-1]
     features = data[:,:-1]

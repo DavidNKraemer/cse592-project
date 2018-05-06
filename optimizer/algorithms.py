@@ -125,7 +125,6 @@ def backtracking_line_search( func, x, direction, alpha=0.4, beta=0.9, maximum_i
     t = 1
     iterations = 0
     while True:
-
         if func(x+t*direction, 0)<value_0 + alpha * t * gradient_0.T*direction:
             break
 
@@ -268,6 +267,7 @@ def bfgs( func, initial_x, initial_inv_h, eps=1e-6, maximum_iterations=65536, li
     values = []
     runtimes = []
     xs = []
+    grads = []
     start_time = time.time()
     m = len( x )
     iterations = 0
@@ -286,7 +286,7 @@ def bfgs( func, initial_x, initial_inv_h, eps=1e-6, maximum_iterations=65536, li
         values.append( value )
         runtimes.append( time.time() - start_time )
         xs.append( x.copy() )
-
+        grads.append(gradient.copy())
         # termination criterion
         if np.vdot( gradient, gradient ) <= eps:
             break
@@ -313,7 +313,7 @@ def bfgs( func, initial_x, initial_inv_h, eps=1e-6, maximum_iterations=65536, li
         if iterations >= maximum_iterations:
             break
 
-    return (x, values, runtimes, xs)
+    return (x, values, runtimes, xs, grads)
 
 ###############################################################################
 def objective_log_barrier( f, phi, x, t, order=0 ):
@@ -473,8 +473,10 @@ def subgradient_descent( func, initial_x, maximum_iterations=65536, initial_step
     values = []
     runtimes = []
     xs = []
+    grads = []
     start_time = time.time()
     iterations = 0
+
 #    stepsize = initial_stepsize
 
     # subgradient updates
@@ -489,7 +491,7 @@ def subgradient_descent( func, initial_x, maximum_iterations=65536, initial_step
         values.append( value )
         runtimes.append( time.time() - start_time )
         xs.append( x.copy() )
-
+        grads.append(gradient.copy())
         # x = ( TODO: update of subgradient descent )
         if iterations:
             x -= initial_stepsize / np.sqrt(iterations) * gradient
@@ -499,7 +501,7 @@ def subgradient_descent( func, initial_x, maximum_iterations=65536, initial_step
         if iterations >= maximum_iterations:
             break
 
-    return (x, values, runtimes, xs)
+    return (x, values, runtimes, xs, grads)
 
 
 def adagrad( func, initial_x, maximum_iterations=65536, initial_stepsize=1, initial_sum_of_squares=1e-3):
@@ -518,6 +520,7 @@ def adagrad( func, initial_x, maximum_iterations=65536, initial_stepsize=1, init
     values = []
     runtimes = []
     xs = []
+    grads = []
     start_time = time.time()
     iterations = 0
     sumgrad = np.zeros(np.asmatrix(initial_x).shape)
@@ -533,7 +536,7 @@ def adagrad( func, initial_x, maximum_iterations=65536, initial_stepsize=1, init
         values.append( value )
         runtimes.append( time.time() - start_time )
         xs.append( x.copy() )
-
+        grads.append(gradient.copy())
 
         sumgrad += np.power(gradient, 2)
         stepsize = initial_stepsize / np.sqrt(initial_sum_of_squares + sumgrad)
@@ -543,4 +546,4 @@ def adagrad( func, initial_x, maximum_iterations=65536, initial_stepsize=1, init
         if iterations >= maximum_iterations:
             break
 
-    return (x, values, runtimes, xs)
+    return (x, values, runtimes, xs, grads)
