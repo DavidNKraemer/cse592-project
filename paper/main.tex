@@ -15,6 +15,33 @@
 \usepackage{mathtools}
 \usepackage{algpseudocode}
 \usepackage{algorithm}
+\usepackage{listings}
+
+\usepackage{color}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+
+\lstdefinestyle{mystyle}{
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{magenta},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\footnotesize\tt,
+  breakatwhitespace=false,         
+  breaklines=true,                 
+  captionpos=b,                    
+  keepspaces=true,                 
+  numbers=left,                    
+  numbersep=5pt,                  
+  showspaces=false,                
+  showstringspaces=false,
+  showtabs=false,                  
+  tabsize=2
+}
+
+\lstset{style=mystyle}
 
 \usepackage[
   backend=biber,
@@ -303,6 +330,55 @@ p$.
   \item Explain some implementation issues.
 \end{enumerate}
 
+Our optimization object, \texttt{SQNOptimizer}, is implemented using
+\texttt{NumPy} \cite{numpy} with \texttt{ndarray} objects serving as the primary
+data structures for the numerical computations in Algorithm \ref{alg:sdlbfgs}.
+It inherits the features of the \texttt{ExternalOptimizerInterface}, which
+packages the objective function and its gradients from the network model in use
+and presents it in a \texttt{NumPy}-interoperable format. 
+
+The general framework for using built-in \texttt{Optimizer} objects follows the
+structure presented in Figure \ref{fig:typical}.
+\begin{figure}[h]
+  \begin{lstlisting}[language=Python]
+# ... setup
+optimizer = Optimizer(**kwargs).minimize(objective_function)
+# ... setup
+with tf.Session() as session:
+    # ... training setup
+    optimizer.run(**training_kwargs)
+  \end{lstlisting}
+  \caption{The typical workflow for using built-in \texttt{Optimizer} objects in
+    a statistical learning setting. Here the \texttt{optimizer} is an operation
+    which is configured to minimize the objective function. The actual
+  minimization occurs inside of the session block.}
+  \label{fig:typical}
+\end{figure}
+The initialization of line 2 indicates that \texttt{optimizer} is a minimization
+operation, rather than the result of a minimization. By contrast, for subclasses
+of an \texttt{ExternalOptimizerInterface}, this structure is replaced by the
+workflow in Figure \ref{fig:external}.
+\begin{figure}[h]
+  \begin{lstlisting}[language=Python]
+# ... setup
+optimizer = ExternalOptimizer(objective_function, **kwargs)
+# ... setup
+with tf.Session() as session:
+    # ... training setup
+    optimizer.minimize(session, **training_kwargs)
+  \end{lstlisting}
+  \caption{%
+    The workflow for using objects of 
+  \texttt{ExternalOptimizerInterface} subclasses, such as the implementation of
+  \texttt{SQNOptimizer}. Here the \texttt{optimizer} itself is the minimizer while
+  the \texttt{minimize} method actually performs estimation of the minimal
+  objective function value.  }
+  \label{fig:external}
+\end{figure}
+
+Now, the \texttt{minimize} method returns the \emph{result} of a minimization
+rather than a minimization operation. As \texttt{SQNOptimizer} inherits this
+functionality, the second workflow is required. 
 
 \section{Empirical results}
 

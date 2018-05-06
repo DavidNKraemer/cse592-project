@@ -1932,6 +1932,7 @@
     <bcf:citekey order="5">sdlbfgs</bcf:citekey>
     <bcf:citekey order="6">boyd</bcf:citekey>
     <bcf:citekey order="7">sdlbfgs</bcf:citekey>
+    <bcf:citekey order="8">numpy</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="ynt">

@@ -52,6 +52,28 @@
       \field{title}{Convex Optimization}
       \field{year}{2004}
     \endentry
+    \entry{numpy}{book}{}
+      \name{author}{1}{}{%
+        {{hash=30980b3a77ec5b6dd73ca40c2e6e8816}{%
+           family={Oliphant},
+           familyi={O\bibinitperiod},
+           given={Travis\bibnamedelima E},
+           giveni={T\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+      }
+      \strng{namehash}{30980b3a77ec5b6dd73ca40c2e6e8816}
+      \strng{fullhash}{30980b3a77ec5b6dd73ca40c2e6e8816}
+      \strng{bibnamehash}{30980b3a77ec5b6dd73ca40c2e6e8816}
+      \strng{authorbibnamehash}{30980b3a77ec5b6dd73ca40c2e6e8816}
+      \strng{authornamehash}{30980b3a77ec5b6dd73ca40c2e6e8816}
+      \strng{authorfullhash}{30980b3a77ec5b6dd73ca40c2e6e8816}
+      \field{sortinit}{2}
+      \field{sortinithash}{cbff857e587bcb4635511624d773949e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A guide to NumPy}
+      \field{volume}{1}
+      \field{year}{2006}
+    \endentry
     \entry{tensorflow}{misc}{}
       \name{author}{40}{}{%
         {{hash=867ea07876949c233dd4a5481522faba}{%
