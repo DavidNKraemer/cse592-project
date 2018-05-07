@@ -1,5 +1,5 @@
 default: main.tex main.bib
-	pdflatex main
+	pdflatex -shell-escape main
 	biber main
-	pdflatex main
-	pdflatex main
+	pdflatex -shell-escape main
+	pdflatex -shell-escape main
