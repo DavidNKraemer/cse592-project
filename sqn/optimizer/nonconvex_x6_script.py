@@ -11,7 +11,7 @@ from sd_lbfgs import sqrt_sequence as sqrt_seq
 import algorithms as alg
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+from sd_lbfgs import SdLBFGS
 
 sns.set_context('paper')
 
@@ -39,15 +39,18 @@ optimizer = SdLBFGS(obj_f, initial_x,
 
 result = optimizer.run()
 
-sdlbfgs_x =result['iteration_vals']
-sdlbfgs_values =result['iteration_objvals']
-sdlbfgs_runtimes =result['iteration_runtimes']
+sdlbfs_x =result['iteration_vals']
+sdlbfs_values =result['iteration_objvals']
+sdlbfs_runtimes =result['iteration_runtimes']
 sdlbfs_grads = result['iteration_grads']
 
+print('Solution found by sdLBFGS', sdlbfs_x[-1])
+print('Objective function', no_conv_func2(sdlbfs_x[-1],0))
 
-print('Solution found by sdLBFGS', sdlbfgs_x[-1])
-print('Objective function', no_conv_func2(sdlbfgs_x[-1],0))
-
+sdlbfs_its = len(sdlbfs_runtimes)
+sdlbfs_x =sdlbfs_x[0::int(sdlbfs_its/min(sdlbfs_its, points_to_plot))]
+sdlbfs_values =sdlbfs_values[0::int(sdlbfs_its/min(sdlbfs_its, points_to_plot))]
+sdlbfs_runtimes =sdlbfs_runtimes[0::int(sdlbfs_its/min(sdlbfs_its, points_to_plot))]
 sdlbfs_grads = sdlbfs_grads[0::int(sdlbfs_its/min(sdlbfs_its, points_to_plot))]
 
 
@@ -76,11 +79,10 @@ ada_x, ada_values, ada_runtimes, ada_xs, ada_grads = alg.adagrad( obj_f, initial
 print('Solution found by stochastic adagrad', ada_x)
 print('Objective function', obj_f(ada_x,0))
 
-ada_itr = len(ada_runtimes)
+ada_its = len(ada_runtimes)
 
-ada_values=[obj_f(ada_xs[i],0) for i in range(0, ada_itr,int(ada_itr/min(ada_itr, points_to_plot)))]
-ada_xs = ada_xs[0::int(ada_itr/min(ada_itr, points_to_plot))]
-ada_grads = ada_grads[0::int(ada_its/min(ada_its, points_to_plot))]
+ada_values=[obj_f(ada_xs[i],0) for i in range(0, ada_its,int(ada_its/min(ada_its, points_to_plot)))]
+ada_xs = ada_xs[0::int(ada_its/min(ada_its, points_to_plot))]
 
 ada_length = len(ada_values)
 
@@ -113,7 +115,7 @@ plot_settings = {
         }
 
 sdlbfgs_X = np.array([i for i in range(0, len(sdlbfs_values))])
-sdlbfgs_Y = abs(obj_f(np.array(sdlbfs_x).reshape(sdlbfgs_X.shape), 1)[1])
+sdlbfgs_Y = abs(np.array(sdlbfs_grads)).reshape(sdlbfgs_X.shape)
 line_sdlbfgs, = plt.semilogx( sdlbfgs_X, sdlbfgs_Y, linewidth=2, color='k', dashes = [1, 1],
                          marker='.', label='SdLBFGS')
 
