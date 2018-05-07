@@ -35,7 +35,7 @@ class SdLBFGS():
             step_size=default_step_size,
             delta=0.01,
             tol=1e-4,
-
+            damp=True,
             **kwargs):
 
         self._func = func
@@ -48,6 +48,7 @@ class SdLBFGS():
         self._step_size = lambda k:step_size(k, self._init_step_size)
         self._init_step_size = init_step_size
         self._delta = delta
+        self._damp = damp
         self._tolerance = tol
 
         self._iterations = 0
@@ -151,8 +152,8 @@ class SdLBFGS():
                 rho = 0
             else:
                 rho = 1. / sTy
-
-#        theta =1
+        if not self._damp:
+            theta =1
 
         y_bar = theta * y + ((1. - theta) * gamma) * s
 
