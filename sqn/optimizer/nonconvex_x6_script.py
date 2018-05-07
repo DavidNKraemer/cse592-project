@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
+from sys import path
+path.append('../../optimizer/')
+
+from sd_lbfgs import SdLBFGS
+
 from sd_lbfgs import SdLBFGS
 from sd_lbfgs import harmonic_sequence as harmonic_seq
 from sd_lbfgs import sqrt_sequence as sqrt_seq
+
+import algorithms as alg
 import matplotlib.pyplot as plt
 import numpy as np
-from sd_lbfgs import SdLBFGS
+import seaborn as sns
+
+sns.set_context('paper')
 
 
 #%%
@@ -30,20 +39,22 @@ optimizer = SdLBFGS(obj_f, initial_x,
 
 result = optimizer.run()
 
-sdlbfs_x =result['iteration_vals']
-sdlbfs_values =result['iteration_objvals']
-sdlbfs_runtimes =result['iteration_runtimes']
+sdlbfgs_x =result['iteration_vals']
+sdlbfgs_values =result['iteration_objvals']
+sdlbfgs_runtimes =result['iteration_runtimes']
 
 
-print('Solution found by sdLBFGS', sdlbfs_x[-1])
-print('Objective function', no_conv_func2(sdlbfs_x[-1],0))
+print('Solution found by sdLBFGS', sdlbfgs_x[-1])
+print('Objective function', no_conv_func2(sdlbfgs_x[-1],0))
 
-sdlbfs_x =sdlbfs_x[0::int(len(sdlbfs_x)/min(len(sdlbfs_runtimes), points_to_plot))]
-sdlbfs_values =sdlbfs_values[0::int(len(sdlbfs_values)/min(len(sdlbfs_runtimes), points_to_plot))]
-sdlbfs_runtimes =sdlbfs_runtimes[0::int(len(sdlbfs_runtimes)/min(len(sdlbfs_runtimes), points_to_plot))]
+sdlbfgs_x =sdlbfgs_x[0::int(len(sdlbfgs_x)/min(len(sdlbfgs_runtimes), points_to_plot))]
+sdlbfgs_values = sdlbfgs_values[0::int(len(sdlbfgs_values)/min(len(sdlbfgs_runtimes), points_to_plot))]
+sdlbfgs_runtimes =sdlbfgs_runtimes[0::int(len(sdlbfgs_runtimes)/min(len(sdlbfgs_runtimes), points_to_plot))]
+sdlbfgs_length = len(sdlbfgs_values)
 
-'SGD'
-import algorithms as alg
+
+"""SGD"""
+
 
 obj_f = lambda x, order: no_conv_func2(x, order)
 initial_x = 2.
@@ -55,20 +66,28 @@ print('Objective function', obj_f(sgd_x,0))
 sgd_its = len(sgd_runtimes)
 sgd_values=[obj_f(sgd_xs[i],0) for i in range(0,sgd_its,int(sgd_its/min(sgd_its,points_to_plot)))]
 sgd_xs = sgd_xs[0::int(sgd_its/min(sgd_its, points_to_plot))]
+sgd_length = len(sgd_values)
 
 
-'Ada'
+"""Ada"""
+
+
 obj_f = lambda x, order: no_conv_func2(x, order)
 ada_x, ada_values, ada_runtimes, ada_xs = alg.adagrad( obj_f, initial_x, max_iterations, 0.1)
 print('Solution found by stochastic adagrad', ada_x)
 print('Objective function', obj_f(ada_x,0))
 
-ada_its = len(ada_runtimes)
+ada_itr = len(ada_runtimes)
 
-ada_values=[obj_f(ada_xs[i],0) for i in range(0, ada_its,int(ada_its/min(ada_its, points_to_plot)))]
-ada_xs = ada_xs[0::int(ada_its/min(ada_its, points_to_plot))]
+ada_values=[obj_f(ada_xs[i],0) for i in range(0, ada_itr,int(ada_itr/min(ada_itr, points_to_plot)))]
+ada_xs = ada_xs[0::int(ada_itr/min(ada_itr, points_to_plot))]
 
-'BFGS'
+ada_length = len(ada_values)
+
+
+"""BFGS"""
+
+
 obj_f = lambda x, order: no_conv_func2(x, order)
 init_h = 0.1
 bfgs_x, bfgs_values, bfgs_runtimes, bfgs_xs = alg.bfgs(obj_f, initial_x, init_h, maximum_iterations=max_iterations)
@@ -80,84 +99,127 @@ bfgs_its = len(bfgs_runtimes)
 bfgs_values = [obj_f(bfgs_xs[i],0) for i in range(0,bfgs_its,int(bfgs_its/min(bfgs_its, points_to_plot)))]
 bfgs_xs = bfgs_xs[0::int(bfgs_its/min(bfgs_its, points_to_plot))]
 
+bfgs_length = len(bfgs_values)
+
 
 
 
 #%%
 '''num iterations to gradient norm'''
-plt.figure(figsize=(14,8))
+fig, axes = plt.subplots(1,3, figsize=(12,4))
+
+plot_settings = {
+        'linewidth' : 2,
+        'dashes' : [1,1],
+        }
 
 
-sdlbfgs_X = np.array([i for i in range(0, len(sdlbfs_values))])
-sdlbfgs_Y = abs(obj_f(np.array(sdlbfs_x).reshape(sdlbfgs_X.shape), 1)[1])
-line_sdlbfgs, = plt.semilogx( sdlbfgs_X, sdlbfgs_Y, linewidth=2, color='k', dashes = [1, 1],
-                         marker='.', label='SdLBFGS')
+sdlbfgs_X = np.arange(sdlbfgs_length)
+sdlbfgs_Y = abs(obj_f(np.array(sdlbfgs_x).reshape(sdlbfgs_X.shape), 1)[1])
 
-sgd_X = np.array([i for i in range(len(sgd_values))])
+line_sdlbfgs, = axes[0].semilogx(
+        sdlbfgs_X, 
+        sdlbfgs_Y, 
+        marker='.',
+        label='SdLBFGS', 
+        **plot_settings)
+
+sgd_X = np.arange(sgd_length)
 sgd_Y = abs(obj_f(np.array(sgd_xs).reshape(sgd_X.shape),1)[1])
-line_sgd, = plt.semilogx(sgd_X,sgd_Y, linewidth=2, color='r', dashes = [1, 1],
-                         marker='o', label='SGD')
 
-ada_X = np.array([i for i in range(len(ada_values))])
+line_sgd, = axes[0].semilogx(
+        sgd_X,
+        sgd_Y, 
+        marker='o', 
+        label='SGD',
+        **plot_settings)
+
+ada_X = np.arange(ada_length)
 ada_Y = abs(obj_f(np.array(ada_xs).reshape(ada_X.shape),1)[1])
-line_ada, = plt.semilogx(ada_X, ada_Y, linewidth=2, color='b', dashes = [4, 1],
-                        marker='x', label='AdaGrad')
+
+line_ada, = axes[0].semilogx(
+        ada_X, 
+        ada_Y, 
+        marker='x', 
+        label='AdaGrad',
+        **plot_settings)
 
 
-bfgs_X = np.array([i for i in range(len(bfgs_values))])
+bfgs_X = np.arange(bfgs_length)
 bfgs_Y = abs(obj_f(np.array(bfgs_xs).reshape(bfgs_X.shape), 1)[1])
-line_bfgs = plt.semilogx(bfgs_X, bfgs_Y, linewidth=2, color='g', dashes = [4, 1],
-                        marker='x', label='BFGS')
 
-plt.title(r'non-convex function $x^{6}-2x^{5}+x^{3}-x^{2}+3x$')
-plt.legend()
-plt.xlabel('Iteration')
-plt.ylabel('Norm of gradient')
-plt.show()
+line_bfgs = axes[0].semilogx(
+        bfgs_X, 
+        bfgs_Y, 
+        marker='x', 
+        label='BFGS',
+        **plot_settings)
+
+#plt.title(r'non-convex function $x^{6}-2x^{5}+x^{3}-x^{2}+3x$')
+axes[0].legend()
+axes[0].set_xlabel('Iteration')
+axes[0].set_ylabel('$||\\nabla f(x) ||_2$')
 
 #%%
+
 '''num of iterations to object function values'''
-plt.figure(figsize=(14,8))
 
-sdlbfgs_X = np.array([i for i in range(0, len(sdlbfs_values))])
-sdlbfgs_Y = np.array(sdlbfs_values)
-line_sdlbfgs, = plt.semilogx( sdlbfgs_X, sdlbfgs_Y, linewidth=2, color='k', dashes = [1, 1],
-                         marker='.', label='SdLBFGS')
+sdlbfgs_Y = np.array(sdlbfgs_values)
 
-sgd_X = np.array([i for i in range(len(sgd_values))])
+line_sdlbfgs = axes[1].semilogx(
+        sdlbfgs_X, 
+        sdlbfgs_Y, 
+        marker='v', 
+        label='SdLBFGS',
+        **plot_settings)
+
 sgd_Y = np.array(sgd_values).reshape(sgd_X.shape)
 
-line_sgd, = plt.semilogx(sgd_X,sgd_Y, linewidth=2, color='r', dashes = [1, 1],
-                         marker='o', label='SGD')
+line_sgd, = axes[1].semilogx(
+        sgd_X,
+        sgd_Y, 
+        marker='o', 
+        label='SGD',
+        **plot_settings)
 
 
-ada_X = np.array([i for i in range(len(ada_values))])
 ada_Y = np.array(ada_values).reshape(ada_X.shape)
 
-line_ada, = plt.semilogx(ada_X, ada_Y, linewidth=2, color='b', dashes = [4, 1],
-                        marker='x', label='AdaGrad')
+line_ada, = axes[1].semilogx(
+        ada_X, 
+        ada_Y, 
+        marker='s', 
+        label='AdaGrad',
+        **plot_settings)
 
 
-bfgs_X = np.array([i for i in range(len(bfgs_values))])
 bfgs_Y = np.array(bfgs_values).reshape(bfgs_X.shape)
 
-line_bfgs = plt.semilogx(bfgs_X, bfgs_Y, linewidth=2, color='g', dashes = [4, 1],
-                        marker='x', label='BFGS')
+line_bfgs = axes[1].semilogx(
+        bfgs_X, 
+        bfgs_Y, 
+        marker='D', 
+        label='BFGS',
+        **plot_settings)
 
-plt.title(r'non-convex function $x^{6}-2x^{5}+x^{3}-x^{2}+3x$')
-plt.legend()
-plt.xlabel('Iteration')
-plt.ylabel('Objective function value')
-plt.show()
+#axes[1].title(r'non-convex function $x^{6}-2x^{5}+x^{3}-x^{2}+3x$')
+axes[1].legend()
+axes[1].set_xlabel('Iteration')
+axes[1].set_ylabel('$f(x)$')
+
 #%%
 '''plot object function'''
-plt.figure(figsize=(14,8))
-pltX = np.array([i/10 for i in range(-15, 20, 1)])
 
-pltY = no_conv_func2(pltX, 0)
-plt.plot(pltX, pltY)
-plt.title(r'non-convex function $x^{6}-2x^{5}+x^{3}-x^{2}+3x$')
-plt.xlabel('Iteration')
-plt.ylabel('Objective function value')
-plt.show()
+x_values = np.arange(-1.5,2.,.1)
+y_values = no_conv_func2(x_values, 0)
+
+axes[2].plot(x_values, y_values)
+# axes[2].title(r'non-convex function $x^{6}-2x^{5}+x^{3}-x^{2}+3x$')
+axes[2].set_xlabel('$x$')
+axes[2].set_ylabel('$f(x)$')
+
+plt.suptitle('Non-convex function $f(x) = x^6 - 2x^5 + x^3 - x^2 + 3x$')
+sns.despine(fig=fig)
+
+fig.savefig('../../plots/nonconvex_results.eps', bbox_inches='tight')
 

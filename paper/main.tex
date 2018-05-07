@@ -11,11 +11,13 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 \usepackage{optidef}
+\usepackage[]{graphicx}
 \usepackage{stmaryrd}
 \usepackage{mathtools}
 \usepackage{algpseudocode}
 \usepackage{algorithm}
 \usepackage{listings}
+\usepackage[outdir=../plots/]{epstopdf}
 
 \usepackage{color}
  
@@ -54,6 +56,7 @@
 \newcommand{\RR}{\mathbb{R}}
 \DeclarePairedDelimiter{\norm}{\|}{\|}
 \DeclarePairedDelimiter{\ip}{\langle}{\rangle}
+\DeclarePairedDelimiter{\set}{\{}{\}}
 \DeclarePairedDelimiter{\ex}{\mathbb{E}[}{]}
 \newcommand{\inv}{{}^{-1}}
 \newcommand{\trans}{{}^{\top}}
@@ -388,6 +391,35 @@ functionality, the second workflow is required.
   \item Results on potentially more difficult optimization problems.
   \item Lack of results on MNIST with TensorFlow.
 \end{enumerate}
+
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{../plots/nonconvex_results}
+  \caption{
+    SdLBFGS compared with traditional BFGS together with AdaGrad and Stochastic
+    Gradient Descent on the problem $f(x) = x^6 - 2x^5 + x^3 - x^2 + 3x$, shown
+    on the right. Each algorithm is initialized near the local minimum at around
+    $x = 1.6$. We see that SGD, AdaGrad, and BFGS quickly converge to the local
+    minimum, whereas SdLBFGS converges to the global minimum at around $x =
+    -0.8$ more slowly.
+  }
+  \label{fig:convex-linear-system}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{../plots/linear_system_loss}
+  \caption{
+    SdLBFGS performance on the solving the overdetermined linear system
+    $Ax = b$ with $A \in \RR^{50 \times 100}$ with convex smooth loss function
+    $\norm{Ax-b}_2^2$. We sweep different memory capacity values $p \in
+    \set{1,10,20,30}$ and observe that convergence is approximately equivalent
+    between configurations.
+  }
+  \label{fig:convex-linear-system}
+\end{figure}
 
 
 \section{Discussion}
