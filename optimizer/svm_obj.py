@@ -5,6 +5,9 @@ from sd_lbfgs import harmonic_sequence as harmonic_seq
 from sd_lbfgs import sqrt_sequence as sqrt_seq
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
+
+sns.set_context('paper')
 
 def norm_z(x):
     x=(x-x.mean())/x.std()
@@ -144,70 +147,107 @@ lbfgs_runtimes =lbfgs_runtimes[0::int(lbfgs_its/min(lbfgs_its, points_to_plot))]
 lbfgs_grads = lbfgs_grads[0::int(lbfgs_its/min(lbfgs_its, points_to_plot))]
 #%%
 '''num iterations to gradient norm'''
-plt.figure(figsize=(14,8))
+fig, axes = plt.subplots(1,2, figsize=(12,4))
+
+plot_settings = {
+        'linewidth': 2,
+        'dashes': [1,1]
+        }
 
 
 sdlbfgs_X = np.array([i for i in range(0, len(sdlbfs_values))])
 sdlbfgs_Y = np.linalg.norm(np.array(sdlbfs_grads), axis=1).reshape(sdlbfgs_X.shape)
-line_sdlbfgs, = plt.semilogx( sdlbfgs_X, sdlbfgs_Y, linewidth=2, color='k', dashes = [1, 1],
-                         marker='.', label='SdLBFGS')
+line_sdlbfgs, = axes[0].semilogx(
+        sdlbfgs_X, 
+        sdlbfgs_Y, 
+        marker='v', 
+        label='SdLBFGS',
+        **plot_settings)
 
 sgd_X = np.array([i for i in range(len(sgd_values))])
 sgd_Y = np.linalg.norm(np.array(sgd_grads), axis=1).reshape(sgd_X.shape)
-line_sgd, = plt.semilogx(sgd_X,sgd_Y, linewidth=2, color='r', dashes = [1, 1],
-                         marker='o', label='SGD')
+line_sgd, = axes[0].semilogx(
+        sgd_X,
+        sgd_Y, 
+        marker='o', 
+        label='SGD',
+        **plot_settings)
 
 ada_X = np.array([i for i in range(len(ada_values))])
 ada_Y = np.linalg.norm(np.array(ada_grads),axis=1).reshape(ada_X.shape)
-line_ada, = plt.semilogx(ada_X, ada_Y, linewidth=2, color='b', dashes = [4, 1],
-                        marker='x', label='AdaGrad')
+line_ada, = axes[0].semilogx(
+        ada_X, 
+        ada_Y, 
+        marker='s', 
+        label='AdaGrad',
+        **plot_settings)
 
 
 lbfgs_X = np.array([i for i in range(len(lbfgs_values))])
 lbfgs_Y = np.linalg.norm(np.array(lbfgs_grads),axis=1).reshape(lbfgs_X.shape)
-line_bfgs = plt.semilogx(lbfgs_X, lbfgs_Y, linewidth=2, color='g', dashes = [4, 1],
-                        marker='x', label='LBFGS')
+line_bfgs = axes[0].semilogx(
+        lbfgs_X, 
+        lbfgs_Y, 
+        marker='D',
+        label='LBFGS',
+        **plot_settings)
 
-plt.title(r'SVM loss function $\max(0, 1 - ywx)$')
-plt.legend()
-plt.xlabel('Iteration')
-plt.ylabel('Norm of gradient')
-plt.show()
+#axes[0].set_title(r'SVM loss function $f(x) = \max(0, 1 - ywx)$')
+axes[0].legend()
+axes[0].set_xlabel('Iteration')
+axes[0].set_ylabel('$|| \\nabla f(x) ||$')
 
 #%%
 '''num of iterations to object function values'''
-plt.figure(figsize=(14,8))
 
 sdlbfgs_X = np.array([i for i in range(0, len(sdlbfs_values))])
 sdlbfgs_Y = np.array(sdlbfs_values).reshape(sdlbfgs_X.shape)
-line_sdlbfgs, = plt.semilogx( sdlbfgs_X, sdlbfgs_Y, linewidth=2, color='k', dashes = [1, 1],
-                         marker='.', label='SdLBFGS')
+line_sdlbfgs, = axes[1].semilogx(
+        sdlbfgs_X, 
+        sdlbfgs_Y, 
+        marker='v', 
+        label='SdLBFGS',
+        **plot_settings)
 
 sgd_X = np.array([i for i in range(len(sgd_values))])
 sgd_Y = np.array(sgd_values).reshape(sgd_X.shape)
 
-line_sgd, = plt.semilogx(sgd_X,sgd_Y, linewidth=2, color='r', dashes = [1, 1],
-                         marker='o', label='SGD')
+line_sgd, = axes[1].semilogx(
+        sgd_X,
+        sgd_Y, 
+        marker='o', 
+        label='SGD',
+        **plot_settings)
 
 
 ada_X = np.array([i for i in range(len(ada_values))])
 ada_Y = np.array(ada_values).reshape(ada_X.shape)
 
-line_ada, = plt.semilogx(ada_X, ada_Y, linewidth=2, color='b', dashes = [4, 1],
-                        marker='x', label='AdaGrad')
+line_ada, = axes[1].semilogx(
+        ada_X, 
+        ada_Y, 
+        marker='s', 
+        label='AdaGrad',
+        **plot_settings)
 
 
 lbfgs_X = np.array([i for i in range(len(lbfgs_values))])
 lbfgs_Y = np.array(lbfgs_values).reshape(lbfgs_X.shape)
 
-line_bfgs = plt.semilogx(lbfgs_X,lbfgs_Y, linewidth=2, color='g', dashes = [4, 1],
-                        marker='x', label='LBFGS')
+line_bfgs = axes[1].semilogx(
+        lbfgs_X,
+        lbfgs_Y, 
+        marker='D', 
+        label='LBFGS',
+        **plot_settings)
 
-plt.title(r'SVM loss function $\max(0, 1 - ywx)$')
-plt.legend()
-plt.xlabel('Iteration')
-plt.ylabel('Objective function value')
-plt.show()
+axes[1].legend()
+axes[1].set_xlabel('Iteration')
+axes[1].set_ylabel('$f(x)$')
+plt.suptitle(r'SVM loss function $\max(0, 1 - ywx)$')
+sns.despine(fig=fig)
+
+fig.savefig('../plots/svm_hinge_loss.eps', bbox_inches='tight')
 
 #%%
 

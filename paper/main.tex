@@ -89,8 +89,18 @@
 
 
 \begin{abstract}
-  We do some shit and it doesn't work.
+  We implement a stochastic damped limited memory version of the classical BFGS
+  quasi-Newton minimization algorithm for use in the \texttt{TensorFlow}
+  graphical computation and neural network framework. The implementation is
+  linked to \texttt{TensorFlow} as an \texttt{ExternalOptimizerInterface}
+  object, which circumvents architectural challenges in implementing
+  second-order methods. We provide empirical data to show that the
+  implementation can solve minimization problems in line with its peers. We do
+  not report results on typical problems that are solved using
+  \texttt{TensorFlow} because we find problems of this scale are presently
+  computationally intractible for our implementation.
 \end{abstract}
+
 
 
 \section{Introduction}
@@ -170,12 +180,12 @@ removal, and user interface improvements are currently evolving.
 \section{Review of theory}
 
 
-\begin{enumerate}
-  \item Review main results of the Wang, Ma, Goldfarb, Liu paper
-    \cite{sdlbfgs}
-  \item State the SdLBFGS algortihm.
-  \item Mention some details about how the algorithm translates to code.
-\end{enumerate}
+% \begin{enumerate}
+%   \item Review main results of the Wang, Ma, Goldfarb, Liu paper
+%     \cite{sdlbfgs}
+%   \item State the SdLBFGS algortihm.
+%   \item Mention some details about how the algorithm translates to code.
+% \end{enumerate}
 
 
 The SdLBFGS algorithm is proposed by Wang, Ma, Goldfarb, and Liu \cite{sdlbfgs}
@@ -383,6 +393,7 @@ Now, the \texttt{minimize} method returns the \emph{result} of a minimization
 rather than a minimization operation. As \texttt{SQNOptimizer} inherits this
 functionality, the second workflow is required. 
 
+
 \section{Empirical results}
 
 
@@ -395,7 +406,14 @@ functionality, the second workflow is required.
 We evaluate our implementation of SdLBFGS on a collection of test functions.
 Figure \ref{fig:convex-linear-system} shows the effect of changing the memory
 capacity on a relatively small fully-observable convex differentiable problem.
-Figure \ref{fig:nonconvex-comparison}.
+Figure \ref{fig:nonconvex-comparison}. Additionally, we compare the performance
+of our implementation of SdLBFGS with other common minimizers on a
+dataset\footnote{The data was provided by Professor Orabona.} for a Higgs boson
+classification problem. Empirical results in Figure \ref{fig:svm-hinge} are
+interesting simply by virtue of lacking any theoretical justification for
+convergence, as the loss function is not $C^1$ with Lipschitz gradient. The
+results when the loss function is in $C^1$ with Lipschitz gradient, as in Figure
+\ref{fig:svm-tan}, however, do conform to the theoretical guarantees.
 
 We do not report on results of using the \texttt{SQNOptimizer} to solve
 standard neural network problems in the \texttt{TensorFlow} framework.
@@ -429,6 +447,35 @@ insufficiently well for use in large scale machine learning problems.
     between configurations.
   }
   \label{fig:convex-linear-system}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{../plots/svm_hinge_loss.eps}
+  \caption{
+    SdLBFGS performance on the Higgs boson dataset using an SVM classifier with
+    a hinge loss function, compared with other minimization algorithms. Though
+    no theoretical guarantees are made about the performance of SdBFGS, we
+    observe that it behaves quite well with respect to its peers. The outlier
+    performance is the standard L-BFGS algorithm, which seems to behave poorly
+    on this problem.
+  }
+  \label{fig:svm-hinge}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{../plots/svm_tan_regularized_loss.eps}
+  \caption{
+    SdLBFGS performance on the Higgs boson dataset using an SVM classifier with
+    a smooth regularized function, compared with other minimization algorithms.
+    Unlike in Figure \ref{fig:svm-hinge}, we do have theoretical convergence
+    guarantees for this $f(x)$. We also
+    observe that it behaves quite well with respect to its peers. The outlier
+    performance is again the standard L-BFGS algorithm, which seems to behave poorly
+    on this problem.
+  }
+  \label{fig:svm-tan}
 \end{figure}
 
 
