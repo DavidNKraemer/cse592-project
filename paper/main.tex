@@ -392,6 +392,16 @@ functionality, the second workflow is required.
   \item Lack of results on MNIST with TensorFlow.
 \end{enumerate}
 
+We evaluate our implementation of SdLBFGS on a collection of test functions.
+Figure \ref{fig:convex-linear-system} shows the effect of changing the memory
+capacity on a relatively small fully-observable convex differentiable problem.
+Figure \ref{fig:nonconvex-comparison}.
+
+We do not report on results of using the \texttt{SQNOptimizer} to solve
+standard neural network problems in the \texttt{TensorFlow} framework.
+Preliminary results suggest that the present implementation scales
+insufficiently well for use in large scale machine learning problems.
+
 
 
 \begin{figure}[h]
@@ -405,7 +415,7 @@ functionality, the second workflow is required.
     minimum, whereas SdLBFGS converges to the global minimum at around $x =
     -0.8$ more slowly.
   }
-  \label{fig:convex-linear-system}
+  \label{fig:nonconvex-comparison}
 \end{figure}
 
 \begin{figure}[h]
@@ -424,13 +434,45 @@ functionality, the second workflow is required.
 
 \section{Discussion}
 
+In this work we sought to develop an implementation of SdLBFGS which can be used
+to solve large scale machine learning problems using \texttt{TensorFlow}. By
+this measure, we have reported a negative result. Our preliminary results
+suggest that our implementation, broadly speaking, works satisfactorily on small
+problems, but our attempts at using the \texttt{SQNOptimizer} on problems of the
+size of a typical neural network have been proven infeasible.
 
-\begin{enumerate}
-  \item Explaining why the basic project --- implementing a useful practical
-    TensorFlow optimzier --- failed.
-  \item Takeaways from the results.
-  \item Future work.
-\end{enumerate}
+Might we say with certainty, then, that the external optimizer approach taken in
+this paper is simply insufficient for solving problems that are typical for the
+\texttt{TensorFlow} framework? Much analysis of our implementation remains
+before we may reject with certainty our approach. The fundamental obstacles we
+encountered were sensitivities to algorithm parameter choices and overall speed
+in computation, both of which yield many possibilities for future work. In the
+former, there may exist choices of step size $\alpha_k$ which perform
+sufficiently admirably for this application, or the trade off frontier between
+memory capacity and computational feasibility may yet become apparent.
+
+In the latter, many directions exist through which the performance of our native
+Python and \texttt{NumPy} implementation might improve significantly. Having
+identified and dealt with potential bottlenecks around the main body of the
+SdLBFGS update, the judicious introduction of performance optimizing tools could
+bring the runtime cost of the implementation into relative feasibility. Such
+tools exist inside the Python ecosystem, from JIT-enhancing through Numba to
+static typing optimizations with Cython. In many cases significant speedups may
+be found by merely modifying the underlying data structures or by adopting
+lazier evaluation techniques.
+
+The central point is that we cannot rule out the
+\texttt{ExternalOptimizerInterface} approach until the exploration of these
+potential improvements has sufficiently resolved the questions raised above.
+Further effort is needed to resolve this partial result.
+
+
+% \begin{enumerate}
+%   \item Explaining why the basic project --- implementing a useful practical
+%     TensorFlow optimzier --- failed.
+%   \item Takeaways from the results.
+%   \item Future work.
+% \end{enumerate}
 
 
 \printbibliography[heading=bibintoc]
