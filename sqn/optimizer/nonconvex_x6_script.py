@@ -20,7 +20,7 @@ sns.set_context('paper')
 '''non-convex function'''
 
 points_to_plot=100
-max_iterations = 10000
+max_iterations = 1000
 
 from hw1_functions import no_conv_func2
 obj_f = lambda x : no_conv_func2(x, order=1)
@@ -35,22 +35,20 @@ optimizer = SdLBFGS(obj_f, initial_x,
 #                    step_size=harmonic_seq,
                     mem_size=20,
                     init_step_size=0.1,
-                    max_iterations=10000)
+                    max_iterations=1000)
 
 result = optimizer.run()
 
 sdlbfgs_x =result['iteration_vals']
 sdlbfgs_values =result['iteration_objvals']
 sdlbfgs_runtimes =result['iteration_runtimes']
+sdlbfs_grads = result['iteration_grads']
 
 
 print('Solution found by sdLBFGS', sdlbfgs_x[-1])
 print('Objective function', no_conv_func2(sdlbfgs_x[-1],0))
 
-sdlbfgs_x =sdlbfgs_x[0::int(len(sdlbfgs_x)/min(len(sdlbfgs_runtimes), points_to_plot))]
-sdlbfgs_values = sdlbfgs_values[0::int(len(sdlbfgs_values)/min(len(sdlbfgs_runtimes), points_to_plot))]
-sdlbfgs_runtimes =sdlbfgs_runtimes[0::int(len(sdlbfgs_runtimes)/min(len(sdlbfgs_runtimes), points_to_plot))]
-sdlbfgs_length = len(sdlbfgs_values)
+sdlbfs_grads = sdlbfs_grads[0::int(sdlbfs_its/min(sdlbfs_its, points_to_plot))]
 
 
 """SGD"""
@@ -58,7 +56,7 @@ sdlbfgs_length = len(sdlbfgs_values)
 
 obj_f = lambda x, order: no_conv_func2(x, order)
 initial_x = 2.
-sgd_x, sgd_values, sgd_runtimes, sgd_xs = \
+sgd_x, sgd_values, sgd_runtimes, sgd_xs, sgd_grads = \
     alg.subgradient_descent(obj_f, initial_x, max_iterations, 0.01)
 
 print('Solution found by stochastic subgradient descent', sgd_x)
@@ -66,6 +64,7 @@ print('Objective function', obj_f(sgd_x,0))
 sgd_its = len(sgd_runtimes)
 sgd_values=[obj_f(sgd_xs[i],0) for i in range(0,sgd_its,int(sgd_its/min(sgd_its,points_to_plot)))]
 sgd_xs = sgd_xs[0::int(sgd_its/min(sgd_its, points_to_plot))]
+sgd_grads = sgd_grads[0::int(sgd_its/min(sgd_its, points_to_plot))]
 sgd_length = len(sgd_values)
 
 
@@ -73,7 +72,7 @@ sgd_length = len(sgd_values)
 
 
 obj_f = lambda x, order: no_conv_func2(x, order)
-ada_x, ada_values, ada_runtimes, ada_xs = alg.adagrad( obj_f, initial_x, max_iterations, 0.1)
+ada_x, ada_values, ada_runtimes, ada_xs, ada_grads = alg.adagrad( obj_f, initial_x, max_iterations, 0.1)
 print('Solution found by stochastic adagrad', ada_x)
 print('Objective function', obj_f(ada_x,0))
 
@@ -81,6 +80,7 @@ ada_itr = len(ada_runtimes)
 
 ada_values=[obj_f(ada_xs[i],0) for i in range(0, ada_itr,int(ada_itr/min(ada_itr, points_to_plot)))]
 ada_xs = ada_xs[0::int(ada_itr/min(ada_itr, points_to_plot))]
+ada_grads = ada_grads[0::int(ada_its/min(ada_its, points_to_plot))]
 
 ada_length = len(ada_values)
 
@@ -90,7 +90,7 @@ ada_length = len(ada_values)
 
 obj_f = lambda x, order: no_conv_func2(x, order)
 init_h = 0.1
-bfgs_x, bfgs_values, bfgs_runtimes, bfgs_xs = alg.bfgs(obj_f, initial_x, init_h, maximum_iterations=max_iterations)
+bfgs_x, bfgs_values, bfgs_runtimes, bfgs_xs, bfgs_grads = alg.bfgs(obj_f, initial_x, init_h, maximum_iterations=max_iterations)
 
 print('Solution found by bfgs', bfgs_x)
 print('Objective function', obj_f(bfgs_x,0))
@@ -98,10 +98,9 @@ bfgs_its = len(bfgs_runtimes)
 
 bfgs_values = [obj_f(bfgs_xs[i],0) for i in range(0,bfgs_its,int(bfgs_its/min(bfgs_its, points_to_plot)))]
 bfgs_xs = bfgs_xs[0::int(bfgs_its/min(bfgs_its, points_to_plot))]
+bfgs_grads = bfgs_grads[0::int(bfgs_its/min(bfgs_its, points_to_plot))]
 
 bfgs_length = len(bfgs_values)
-
-
 
 
 #%%
@@ -113,6 +112,10 @@ plot_settings = {
         'dashes' : [1,1],
         }
 
+sdlbfgs_X = np.array([i for i in range(0, len(sdlbfs_values))])
+sdlbfgs_Y = abs(obj_f(np.array(sdlbfs_x).reshape(sdlbfgs_X.shape), 1)[1])
+line_sdlbfgs, = plt.semilogx( sdlbfgs_X, sdlbfgs_Y, linewidth=2, color='k', dashes = [1, 1],
+                         marker='.', label='SdLBFGS')
 
 sdlbfgs_X = np.arange(sdlbfgs_length)
 sdlbfgs_Y = abs(obj_f(np.array(sdlbfgs_x).reshape(sdlbfgs_X.shape), 1)[1])

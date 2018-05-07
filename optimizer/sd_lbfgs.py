@@ -4,11 +4,13 @@ Created on Thu Apr 19 02:07:39 2018
 
 @author: vbigmouse
 """
+
 from numpy import dot, zeros, asarray, sqrt, power
 from math import isnan, isinf
 from scipy.optimize import OptimizeResult
 from time import time
 from pprint import pprint
+
 
 def harmonic_sequence(k, init_step_size):
     # For any nonnegative integer
@@ -17,6 +19,7 @@ def harmonic_sequence(k, init_step_size):
 def sqrt_sequence(k, init_step_size):
     # For any nonnegative integer
     return init_step_size /(sqrt(k+1))
+
 
 def default_step_size(k):
     # For any nonnegative integer
@@ -29,9 +32,10 @@ class SdLBFGS():
             mem_size=10,
             batch_size=50,
             init_step_size=0.1,
-            step_size=harmonic_sequence,
-            delta=0.1,
-            tol=1e-6,
+            step_size=default_step_size,
+            delta=0.01,
+            tol=1e-4,
+
             **kwargs):
 
         self._func = func
@@ -57,12 +61,15 @@ class SdLBFGS():
         self._ybars = ShiftList(self._max_mem_size)
         self._rhos = ShiftList(self._max_mem_size)
 
-        self._iteration_vals = [self._current_val]
-        self._iteration_grads = [self._current_grad]
-        self._iteration_objvals = [self._current_objval]
 
+        self._iteration_vals = []
+        self._iteration_grads = []
+        self._iteration_objvals = []
+
+        self._iteration_grad_errs = []
         self._start_time = time()
-        self._iteration_runtimes = [0]
+        self._iteration_runtimes = []
+
 
         self._result = OptimizeResult()
         self._result['success'] = False
@@ -99,10 +106,9 @@ class SdLBFGS():
 
 
         # stopping criterion, sends back to self.run()
-#        if self._iterations % 10 == 0:
-#            print(f'norm of grad:={dot(self._current_grad.T, self._current_grad)}')
+        self._iteration_grad_errs.append(dot(self._current_grad.T, self._current_grad))
+        if self._iteration_grad_errs[-1]  <= self._tolerance:
 
-        if dot(self._current_grad.T, self._current_grad) <= self._tolerance:
             self._result['success'] = True
 
         # compute search direction
@@ -203,6 +209,8 @@ class SdLBFGS():
         self._result['iteration_grads'] = self._iteration_grads
         self._result['iteration_objvals'] = self._iteration_objvals
         self._result['iteration_runtimes'] = self._iteration_runtimes
+        self._result['iteration_grad_errs'] = self._iteration_grad_errs
+
 
         return self._result
 
